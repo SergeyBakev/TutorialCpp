@@ -216,7 +216,7 @@ namespace NGraph
             }
         }
 
-        void PrintMatrix(__int64** field, size_t height, size_t weight)
+        void PrintMatrix(__int32** field, size_t height, size_t weight)
         {
             for (size_t i = 0; i < height; i++)
             {
@@ -387,51 +387,7 @@ namespace NGraph
             return;
         }
 
-        void FindBFS3(__int64** field, size_t height, size_t weight, size_t from_x, size_t from_y, size_t to_x, size_t to_y)
-        {
-            std::cout << "BFS3 started\n";
-            __int32 dx[] = { 0,1,0,-1 };
-            __int32 dy[] = { -1,0,1,0 };
-            size_t distance = 0;
-            std::queue<std::pair<size_t, size_t>> waves;
-            field[from_x][from_y] = distance;
-            if (from_x == to_x && from_y == to_y)
-            {
-                std::cout << "Point searched!\n";
-                return;
-            }
-            
-            waves.push({ from_x,from_y });
-            distance++;
-            while (!waves.empty())
-            {
-                auto wave = waves.front();
-                for (size_t d = 0; d < 4; d++)
-                {
-                    int nx = wave.first + dx[d];
-                    int ny = wave.second + dy[d];
-
-                    if (field[nx][ny] == i_free)
-                    {
-                        field[nx][ny] = distance;
-                        PrintMatrix(field, height, weight);
-                        if (nx == to_x && ny == to_y)
-                        {
-                            std::cout << "Point searched!\n";
-                            goto end;
-                        }
-                        waves.push({ nx,ny });
-                    }
-                }
-                waves.pop();
-              
-               
-            }
-
-            end:
-            return;
-        }
-
+        using Point2D = std::pair<__int32, __int32>;
         void Test2()
         {
             char** field = new char* [height_];
@@ -536,7 +492,7 @@ namespace NGraph
                 __int32 distance;
             };
 
-            bool BFS(__int64** field, __int32 height, __int32 weight, __int32 from_x, __int32 from_y, __int32 to_x, __int32 to_y)
+            bool BFS(__int32** field, __int32 height, __int32 weight, __int32 from_x, __int32 from_y, __int32 to_x, __int32 to_y,std::vector<Point2D>& path)
             {
                 if (from_x == to_x && from_y == to_y)
                 {
@@ -544,8 +500,6 @@ namespace NGraph
                     return true;
                 }
 
-                __int32 dx[] = { 0,1,0,-1 };
-                __int32 dy[] = { -1,0,1,0 };
                 bool** visited = new bool* [height];
                 for (__int32 i = 0; i < height; i++)
                     visited[i] = new  bool[weight];
@@ -557,7 +511,7 @@ namespace NGraph
                 }
 
                 visited[from_x][from_y] = true;
-
+                field[from_x][from_y] = 0;
                 __int32 min_dist = std::numeric_limits<__int32>::max();
                 std::queue<Node> waves;
                 waves.push({ from_x,from_y,0 });
@@ -579,7 +533,7 @@ namespace NGraph
                         if (IsValid(visited, field, height, weight, nx, ny))
                         {
                             visited[nx][ny] = true;
-                            field[nx][ny] = node.distance;
+                            field[nx][ny] = node.distance + 1;
                             if (nx == to_x && ny == to_y)
                             {
                                 int z = 3;
@@ -593,6 +547,7 @@ namespace NGraph
                 {
                     std::cout << "The shortest path from source to destination "
                         "has length " << min_dist << std::endl;
+                    FindPath(path, from_x, from_y, to_x, to_y, field);
                     return true;
                 }
 
@@ -601,26 +556,66 @@ namespace NGraph
 
         private:
 
-            bool IsValid(bool** visited, __int64** field, __int32 height, __int32 weight, __int32 x, __int32 y)
+            bool IsValid(bool** visited, __int32** field, __int32 height, __int32 weight, __int32 x, __int32 y)
+            {
+                if (!VerifySize(height, weight, x, y))
+                    return false;
+
+                return !IsBlocked(field,x,y) && !visited[x][y];
+            }
+
+            bool IsBlocked(__int32** field, __int32 x, __int32 y)
+            {
+                return field[x][y] == blocked_;
+            }
+
+            bool VerifySize(_int32 height, __int32 weight, __int32 x, __int32 y)
             {
                 if (x > height || y > weight || x < 0 || y < 0)
                     return false;
 
-                return (field[x][y] != blocked_) && !visited[x][y];
+                return true;
             }
+            bool FindPath(std::vector<Point2D>& path, __int32 from_x, __int32 from_y, __int32 to_x, __int32 to_y, __int32** field)
+            {
+                __int32 n = field[to_x][to_y];
+                if (n == 0)
+                {
+                    std::reverse(std::begin(path), std::end(path));
+                    return true;
+                }
 
+                for (size_t d = 0; d < 4; d++)
+                {
+                    __int32 nx = to_x + dx[d];
+                    __int32 ny = to_y + dy[d];
+                    __int32 nn = field[nx][ny];
+                    if (!IsBlocked(field,nx,ny) && nn < n)
+                    {
+                        path.push_back({ nx,ny });
+                        if (FindPath(path, to_x, to_y, nx, ny, field))
+                            return true;
+                    }    
+                }
+
+                return false;
+
+
+            }
         private:
             __int64 free_;
             __int64 blocked_;
+            const __int32 dx[4] = { 0,1,0,-1 };
+            const __int32 dy[4] = { -1,0,1,0 };
 
         };
         void Test4Path()
         {
             size_t height_ = 11;
             size_t weight_ = 11;
-            __int64** field = new __int64* [height_];
+            __int32** field = new __int32* [height_];
             for (size_t i = 0; i < height_; i++)
-                field[i] = new __int64[weight_];
+                field[i] = new __int32[weight_];
 
             for (size_t i = 0; i < height_; i++)
             {
@@ -642,27 +637,37 @@ namespace NGraph
                 }
             }
 
-            size_t cur_x = 5;
-            size_t cur_y = 5;
+            size_t cur_x = 2;
+            size_t cur_y = 8;
             size_t finish_x = 4;
             size_t finish_y = 1;
            
 
-           /* field[2][4] = i_blocked;
+            field[2][4] = i_blocked;
             field[3][4] = i_blocked;
             field[4][4] = i_blocked;
             field[4][3] = i_blocked;
 
             field[5][5] = i_blocked;
-            field[6][3] = i_blocked;*/
+            field[6][3] = i_blocked;
 
-            //field[finish_x][finish_y] = i_free;
+            field[7][5] = i_blocked;
+            field[7][6] = i_blocked;
+
+            field[finish_x][finish_y] = i_free;
+            field[cur_x][cur_y] = 666;
 
 
 
             PrintMatrix(field, height_, weight_);
             GraphAlgorithm alg(i_free, i_blocked);
-            alg.BFS(field, height_, weight_, cur_x, cur_y, finish_x, finish_y);
+            std::vector<Point2D> path;
+            alg.BFS(field, height_, weight_, cur_x, cur_y, finish_x, finish_y, path);
+            std::cout << std::endl;
+            for (const auto& [x,y] : path)
+            {
+                field[x][y] = 0;
+            }
             PrintMatrix(field, height_, weight_);
         }
     }
