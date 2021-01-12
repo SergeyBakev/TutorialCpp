@@ -6,7 +6,9 @@
 #include <xhash>
 #include <queue>
 #include "Graph.h"
+#include "GameField.h"
 #include "boost/graph/edge_list.hpp"
+
 namespace Task1
 {  
     //построить матрицу смежности для множества M={1,2,3,5,6}
@@ -678,43 +680,8 @@ namespace NGraph
 //            }
 //            PrintMatrix(field, height_, weight_);
 //        }
-        enum class eDirection {eLeft,eDown,eRight,eUp};
 
-        struct Edge
-        {
-            size_t x;
-            size_t y;
-            eDirection dir;
-            std::string ToString() const
-            {
-                std::string strDir;
-                switch (dir)
-                {
-                case NGraph::Test::eDirection::eLeft:
-                    strDir = "Left";
-                    break;
-                case NGraph::Test::eDirection::eDown:
-                    strDir = "Down";
-                    break;
-                case NGraph::Test::eDirection::eRight:
-                    strDir = "Right";
-                    break;
-                case NGraph::Test::eDirection::eUp:
-                    strDir = "Up";
-                    break;
-                default:
-                    break;
-                }
-
-                return std::to_string(x) + " " + std::to_string(y) + " " + strDir;
-            }
-        };
-
-        struct Vertex
-        {
-            size_t x;
-            size_t y;
-        };
+       
         void Test5BestPath()
         {
             
@@ -767,10 +734,10 @@ namespace NGraph
             const ptrdiff_t dy[4] = { -1,0,1,0 };
 
             eDirection dir[4] = { eDirection::eLeft,eDirection::eDown,eDirection::eRight,eDirection::eUp };
-            std::pair<size_t, size_t> p;
             std::map < Vertex, std::vector<Edge>> nodes;
+            std::map < Vertex, std::map<eDirection, Edge>> gamefield;
+
             {
-               
                 for (size_t i = 2; i < height_; i++)
                 {
                     for (size_t j = 2; j < weight_; j++)
@@ -779,6 +746,7 @@ namespace NGraph
                         {
                             Vertex v = { i,j };
                             auto it = nodes.insert({ v,{} });
+                            gamefield.insert({ v,{} });
                             for (size_t d = 0; d < 4; d++)
                             {
                                 size_t nx = i + dx[d];
@@ -786,6 +754,7 @@ namespace NGraph
                                 if (field[nx][ny] != i_blocked)
                                 {
                                     it.first->second.push_back({ nx,ny,dir[d] });
+                                    gamefield[v].insert({ dir[d],{nx,ny} });
                                 }
                             }
                         }
@@ -807,44 +776,14 @@ namespace NGraph
     
 }
 
-enum class Button
-{
-    eUndefined,
-    eUp,
-    eDown,
-    eRight,
-    eLeft
-};
 
-Button ToButton(int key)
-{
-    Button ret = Button::eUndefined;
-    switch (key)
-    {
-    case 72:
-        ret = Button::eUp;
-        break;
-    case 80:
-        ret = Button::eDown;
-        break;
-    case 75:
-        ret = Button::eLeft;
-        break;
-    case 77:
-        ret = Button::eRight;
-        break;
-    default:
-        break;
-    }
-
-    return ret;
-}
 
 
 
 int main()
 {
-    NGraph::Test::Main();
+    Game game;
+    game.Run();
 
 }
 
