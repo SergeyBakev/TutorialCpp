@@ -753,7 +753,7 @@ namespace NGraph
                                 size_t ny = j + dy[d];
                                 if (field[nx][ny] != i_blocked)
                                 {
-                                    it.first->second.push_back({ nx,ny,dir[d] });
+                                    it.first->second.push_back({ nx,ny });
                                     gamefield[v].insert({ dir[d],{nx,ny} });
                                 }
                             }

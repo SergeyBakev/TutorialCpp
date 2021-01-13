@@ -7,29 +7,12 @@ struct Edge
 {
     size_t x;
     size_t y;
-    eDirection dir;
     std::string ToString() const
     {
         std::string strDir;
-        switch (dir)
-        {
-        case eDirection::eLeft:
-            strDir = "Left";
-            break;
-        case eDirection::eDown:
-            strDir = "Down";
-            break;
-        case eDirection::eRight:
-            strDir = "Right";
-            break;
-        case eDirection::eUp:
-            strDir = "Up";
-            break;
-        default:
-            break;
-        }
+       
 
-        return std::to_string(x) + " " + std::to_string(y) + " " + strDir;
+        return std::to_string(x) + " " + std::to_string(y);
     }
 };
 
@@ -68,53 +51,11 @@ public:
 
     GameLevel()
     {
-        size_t height_ = 11;
-        size_t weight_ = 11;
-        field_ = new ptrdiff_t * [height_];
-        for (size_t i = 0; i < height_; i++)
-            field_[i] = new ptrdiff_t[weight_];
-
-        for (size_t i = 0; i < height_; i++)
-        {
-            for (size_t j = 0; j < weight_; j++)
-            {
-                field_[i][j] = i_free;
-            }
-        }
-
-        for (size_t j = 0; j < 2; j++)
-        {
-            for (size_t x = 0; x < height_; x++)
-            {
-                field_[j][x] = i_blocked;
-                field_[height_ - j - 1][x] = i_blocked;
-
-                field_[x][j] = i_blocked;
-                field_[x][weight_ - j - 1] = i_blocked;
-            }
-        }
-
-
-        field_[2][4] = i_blocked;
-        field_[3][4] = i_blocked;
-        field_[4][4] = i_blocked;
-        field_[4][3] = i_blocked;
-
-        field_[5][5] = i_blocked;
-        field_[6][3] = i_blocked;
-
-        field_[7][5] = i_blocked;
-        field_[7][6] = i_blocked;
-
-        field_[finish_.x][finish_.y] = i_free;
-
-        InitializeScene();
+        GenerateLevel();
     }
 
     void Draw()
     {
-        size_t height_ = 11;
-        size_t weight_ = 11;
         for (size_t i = 0; i < height_; i++)
         {
             for (size_t j = 0; j < weight_; j++)
@@ -143,25 +84,126 @@ public:
         if (current_ == finish_)
         {
             std::cout << "Game finished\n";
+            IncreaseDifficulty();
+            GenerateLevel();
         }
     }
 
+    void GenerateLevel()
+    {
+        RemoveField();
+        InitializeScene();
+        CreateGraph();
+        SetStartFinish();
+    }
 private:
+
+    void RemoveField()
+    {
+        if (field_ != nullptr)
+        {
+            for (size_t i = 0; i < prev_height_; i++)
+                delete[] field_[i];
+            delete[] field_;
+            field_ = nullptr;
+        }
+    }
+
 
     void InitializeScene()
     {
-        size_t height_ = 11;
-        size_t weight_ = 11;
+        field_ = new ptrdiff_t * [height_ ];
+        for (size_t i = 0; i < height_; i++)
+            field_[i] = new ptrdiff_t[weight_];
+
+        for (size_t i = 0; i < height_; i++)
+        {
+            for (size_t j = 0; j < weight_; j++)
+            {
+                field_[i][j] = i_free;
+            }
+        }
+
+        //generate borders
+        {
+            for (size_t j = 0; j < 2; j++)
+            {
+                for (size_t x = 0; x < height_; x++)
+                {
+                    field_[j][x] = i_blocked;
+                    field_[height_ - j - 1][x] = i_blocked;
+
+                    field_[x][j] = i_blocked;
+                    field_[x][weight_ - j - 1] = i_blocked;
+                }
+            }
+        }
+       
+
+        size_t x_min = 2;
+        size_t y_min = 2;
+        size_t x_max = height_ - 3;
+        size_t y_max = weight_ - 3;
+
+        srand((uint32_t)time(nullptr));
+        //generate blocked point
+        {
+            
+            for (size_t i = 0; i < count_blocked_; i++)
+            {
+                size_t nx = x_min + rand() % x_max;
+                size_t ny = y_min + rand() % y_max;
+                field_[nx][ny] = i_blocked;
+            }
+        }
+
+        //generate finish end person position
+        {
+            size_t nx = x_min + rand() % x_max;
+            size_t ny = y_min + rand() % y_max;
+            current_.x = ny;
+            current_.y = ny;
+        }
+
+        field_[finish_.x][finish_.y] = i_free;
+        field_[current_.x][current_.y] = i_free;
+       /* field_[2][4] = i_blocked;
+        field_[3][4] = i_blocked;
+        field_[4][4] = i_blocked;
+        field_[4][3] = i_blocked;
+
+        field_[5][5] = i_blocked;
+        field_[6][3] = i_blocked;
+
+        field_[7][5] = i_blocked;
+        field_[7][6] = i_blocked;
+
+        field_[finish_.x][finish_.y] = i_free;*/
+    }
+
+    void SetStartFinish()
+    {
+        field_[current_.x][current_.y] = person;
+    }
+
+    void CreateGraph()
+    {
+        gameField_.clear();
+        graph_.clear();
         const ptrdiff_t dx[4] = { 0,1,0,-1 };
         const ptrdiff_t dy[4] = { -1,0,1,0 };
         eDirection dir[4] = { eDirection::eLeft,eDirection::eDown,eDirection::eRight,eDirection::eUp };
-        for (size_t i = 2; i < height_; i++)
+        for (size_t i = 0; i < height_; i++)
         {
-            for (size_t j = 2; j < weight_; j++)
+            for (size_t j = 0; j < weight_; j++)
             {
-                if (field_[i][j] != i_blocked)
+                Vertex v = { i,j };
+                if (v == current_)
                 {
-                    Vertex v = { i,j };
+                    size_t z = 3;
+                }
+                if (field_[i][j] != i_blocked)
+                {               
                     auto it = graph_.insert({ v,{} });
                     gameField_.insert({ v,{} });
                     for (size_t d = 0; d < 4; d++)
@@ -170,25 +212,43 @@ private:
                         size_t ny = j + dy[d];
                         if (field_[nx][ny] != i_blocked)
                         {
-                            it.first->second.push_back({ nx,ny,dir[d] });
+                            it.first->second.push_back({ nx,ny });
                             gameField_[v].insert({ dir[d],{nx,ny} });
                         }
                     }
                 }
             }
         }
-        field_[current_.x][current_.y] = person;
+       
     }
 
+    void IncreaseDifficulty()
+    {
+        count_blocked_+= 4;
+        prev_height_ = height_;
+        prev_weight_ = weight_;
+        height_++;
+        weight_++;
+
+    }
 
 private:
     std::map<Vertex, std::vector<Edge>> graph_;
     std::map<Vertex, std::map<eDirection, Edge>> gameField_;
+
     ptrdiff_t** field_ = nullptr;
+
+    size_t height_ = 11;
+    size_t weight_ = 11;
+
+    size_t prev_height_ = height_;
+    size_t prev_weight_ = height_;
+    size_t count_blocked_ = 10;
 
     Vertex current_ = { 3,3 };
     Vertex prev_ = current_;
     Vertex finish_ = { 4,1 };
+
     ptrdiff_t i_blocked = -1;
     ptrdiff_t i_free = 0x9999F;
     size_t person = 0;
@@ -200,11 +260,11 @@ public:
 
     Game()
     {
-        levels_.insert({0, GameLevel()});
     }
 
     void Run()
     {
+        level_.Draw();
         while (true)
         {
             Button button;
@@ -213,7 +273,7 @@ public:
                 system("cls");
                 button = ToButton(_getch());
                 DoButtonAction(button);
-                levels_[0].Draw();
+                level_.Draw();
             }
             else
             {
@@ -235,7 +295,10 @@ private:
         case Button::eDown:
         case Button::eRight:
         case Button::eLeft:
-            levels_[0].SetCur(ButtoToDir(button));
+            level_.SetCur(ButtoToDir(button));
+            break;
+        case Button::eRestart:
+            level_.GenerateLevel();
             break;
         default:
             break;
@@ -246,7 +309,8 @@ private:
     {
 
     }
+
 private:
     size_t level = 0;
-    std::map<size_t, GameLevel> levels_;
+    GameLevel level_;
 };

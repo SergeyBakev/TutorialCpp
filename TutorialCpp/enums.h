@@ -7,7 +7,8 @@ enum class Button
     eUp,
     eDown,
     eRight,
-    eLeft
+    eLeft,
+    eRestart,
 };
 
 eDirection ButtoToDir(Button button)
@@ -51,6 +52,8 @@ Button ToButton(int key)
     case 77:
         ret = Button::eRight;
         break;
+    case 122:
+        ret = Button::eRestart;
     default:
         break;
     }
