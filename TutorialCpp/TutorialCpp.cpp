@@ -767,7 +767,7 @@ namespace NGraph
                 std::cout << vertex.x << " " << vertex.y << ":";
                 for (auto& edge : edges)
                 {
-                    std::cout << "Edge "<< edge.ToString() << " ";
+                    
                 }
                 std::cout << std::endl;
             }
