@@ -9,8 +9,16 @@ enum class Button
     eRight,
     eLeft,
     eRestart,
-    eX,
-    eQ
+    eX, //algorithm BFS find path
+    eD, //algorithm Dijkstra find path
+    eQ,
+    eLeftUpCorner, // установить в левый угол текущую позицию кнопка ]ъ
+    eTilda
+};
+
+enum class DeveloperCommand
+{
+    eLoad
 };
 
 eDirection ButtoToDir(Button button)
@@ -62,6 +70,18 @@ Button ToButton(int key)
         break;
     case 113:
         ret = Button::eQ; 
+        break;
+    case 93:
+    case 234:
+        ret = Button::eLeftUpCorner;
+        break;
+    case 100:
+    case 162:
+        ret = Button::eD;
+        break;
+    case 96:
+    case 241:
+        ret = Button::eTilda;
         break;
     default:
         break;

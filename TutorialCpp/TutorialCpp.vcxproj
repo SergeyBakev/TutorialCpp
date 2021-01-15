@@ -147,6 +147,7 @@
     <ClCompile Include="TutorialCpp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Algortithms.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="GameField.h" />
     <ClInclude Include="Graph.h" />

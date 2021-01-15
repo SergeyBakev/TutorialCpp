@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <set>
+#include "Algortithms.h"
+#include <thread>
+#include <chrono>
 
 
 struct Vertex
@@ -61,13 +64,16 @@ public:
             }
             std::cout << std::endl;
         }
+        std::cout << "Log:\n";
+        for (const auto& log : logs_)
+            std::cout << log << std::endl; 
     }
 
-    void SetCur(eDirection dir)
+    bool SetCur(eDirection dir)
     {
         auto& map  = gameField_[current_];
         if (!map.contains(dir))
-            return;
+            return false;
 
         auto& edge = map[dir];        
         prev_ = current_;
@@ -75,25 +81,30 @@ public:
         current_.x = edge.vertex.x;
         current_.y = edge.vertex.y;
 
-        field_[current_.x][current_.y] = person;
-        field_[prev_.x][prev_.y] = i_free;
-
+        SetCur(prev_, i_free);
+        SetCur(current_, person);
+        
         if (current_ == finish_)
         {
             std::cout << "Game finished\n";
             IncreaseDifficulty();
             GenerateLevel();
         }
+        return true;
     }
 
-    void SetCur(const Vertex vertex, size_t value = 9)
+    void SetCur(const Vertex vertex, size_t value = 0)
     {
         field_[vertex.x][vertex.y] = value;
+        std::string log = "x: " + std::to_string(vertex.x) + " y: " + std::to_string(vertex.y);
+        logs_.push_back(std::move(log));
+        if (logs_.size() > 30)
+            logs_.clear();
     }
 
-    void ClearPath(std::vector<std::pair<Vertex, size_t>>& path)
+    void ClearPath(std::vector<Vertex>& path)
     {
-        for (auto& [vertex,weight] : path)
+        for (auto& vertex : path)
         {
             field_[vertex.x][vertex.y] = i_free;
         }
@@ -108,7 +119,7 @@ public:
         SetStartFinish();
     }
 
-    bool AlgorithmDijkstra2(const Vertex& from, const Vertex& to, std::vector<std::pair<Vertex,size_t>>& path)
+    bool AlgorithmDijkstra2(const Vertex& from, const Vertex& to, std::vector<Vertex>& path)
     {
         size_t max = std::numeric_limits<size_t>::max() - graph_.size() * 5;
         std::vector<std::tuple<Vertex,size_t, bool>> distances;
@@ -145,7 +156,7 @@ public:
         if (cur_dist != max)
         {
             Vertex pos = to;
-            path.push_back({ pos,cur_dist });
+            path.push_back(pos);
 
             while (cur_dist != 0)
             {
@@ -158,7 +169,7 @@ public:
                     {
                         cur_dist = dist_to_neighbor_vertex;
                         pos = neighbor.vertex;
-                        path.push_back({ pos,cur_dist });
+                        path.push_back(pos);
                         break;
                     }
                 }
@@ -169,46 +180,99 @@ public:
         return false;
     }
 
-    bool AlgorithmDFS(const Vertex& start, const Vertex& to, std::vector<std::pair<Vertex, size_t>>& path)
+    bool AlgorithmDFS(const Vertex& start, std::vector<std::pair<Vertex, size_t>>& path)
     {
         std::vector<bool> used(graph_.size(),false);
         path.clear();
         std::map<Vertex, size_t> helper;
         size_t idx = 0;
         for (auto& [vertex, edges] : graph_)
-        {
             helper.insert({ vertex,idx++ });
-        }
-        size_t cnt = 0;
-        AlgorithmDFS(start, to, path, used, helper,cnt);
+ 
+        AlgorithmDFS(start, path, used, helper);
         return !path.empty();
     }
 
+    bool AlgorithmBFS(const Vertex& start, const Vertex& to, std::vector<Vertex>& path)
+    {
+        size_t max = std::numeric_limits<size_t>::max() - graph_.size() * 5;
+        std::deque<Vertex> queue;
+        std::vector<bool> used(graph_.size(), false);
+        std::vector<size_t> distance(graph_.size(), max);
+        path.resize(graph_.size());
+        std::map<Vertex, size_t> helper;
+        std::map<size_t,Vertex> helper2;
+        size_t idx = 0;
+        for (auto& [vertex, edges] : graph_)
+        {
+            helper.insert({ vertex,idx });
+            helper2.insert({ idx++,vertex });
+        }
+            
+
+        //mark start as root node 
+        distance[helper[start]] = 0;
+        used[helper[start]] = true;
+        queue.push_back(start);
+        while (!queue.empty())
+        {
+            Vertex u = queue.front();
+            queue.pop_front();
+            for (auto& neigbor : graph_[u])
+            {
+                auto& v = neigbor.vertex;
+                if (not used[helper[v]])
+                {
+                    distance[helper[v]] = distance[helper[u]] + 1;
+                    path[helper[v]] = u;
+                    queue.push_back(v);
+                    used[helper[u]] = true;
+                }
+            }
+        }
+
+        //find way
+        {
+            size_t distance_to = distance[helper[to]];
+            if (distance_to == max)
+                return false;
+
+            //warning
+            path.clear();
+            Vertex v = to;
+            while (distance_to != 0)
+            {
+                path.push_back(v);
+                --distance_to;
+                if (distance[distance_to] == max)
+                    return false;
+
+                size_t pos = Algorithms::Vector::IndexOf(distance, distance_to);
+                v = helper2[pos];
+            }
+        }
+
+
+        return true;
+
+    }
     Vertex GetCurrentPos() const { return current_; }
     Vertex GetFinishPos() const { return finish_; }
 
 private:
 
-    void AlgorithmDFS(const Vertex& vertex, const Vertex& to, std::vector<std::pair<Vertex, size_t>>& path, std::vector<bool>& used, std::map<Vertex, size_t>& helper, __out size_t& cnt )
+    void AlgorithmDFS(const Vertex& vertex, std::vector<std::pair<Vertex, size_t>>& path, std::vector<bool>& used, std::map<Vertex, size_t>& helper)
     {
-        path.push_back({ vertex,cnt++ });
-        if (vertex == to)
-        {
-            return ;
-        }
-        
         used[helper[vertex]] = true;
         const auto& neighbors = graph_[vertex];
         for (const auto& neighbor : neighbors)
         {
             if (not used[helper[neighbor.vertex]])
             {
-                AlgorithmDFS(neighbor.vertex, to, path, used, helper,cnt);
-            }
-                
+                path.push_back({ vertex,0 });
+                AlgorithmDFS(neighbor.vertex, path, used, helper);
+            }      
         }
-
-        return;
     }
 
     size_t FindMin(std::vector<std::tuple<Vertex, size_t, bool>>& distances)
@@ -229,6 +293,7 @@ private:
 
         return index;
     }
+
     void RemoveField()
     {
         if (field_ != nullptr)
@@ -240,7 +305,6 @@ private:
         }
     }
 
-   
     void InitializeScene()
     {
         field_ = new ptrdiff_t * [height_ ];
@@ -254,8 +318,7 @@ private:
                 field_[i][j] = i_free;
             }
         }
-
-        //generate borders
+//generate borders
         {
             for (size_t j = 0; j < 2; j++)
             {
@@ -269,6 +332,7 @@ private:
                 }
             }
         }
+        
        
 
         size_t x_min = 2;
@@ -292,24 +356,19 @@ private:
         {
             size_t nx = x_min + rand() % x_max;
             size_t ny = y_min + rand() % y_max;
-            //current_.x = nx;
-            //current_.y = nx;
+            current_.x = nx;
+            current_.y = nx;
+
+            nx = 2 + rand() % height_ - 2;
+            ny = 2 + rand() % height_ - 2;
+           /* finish_.x = nx;
+            finish_.y = ny;*/
+
         }
 
         field_[finish_.x][finish_.y] = i_free;
         field_[current_.x][current_.y] = i_free;
-       /* field_[2][4] = i_blocked;
-        field_[3][4] = i_blocked;
-        field_[4][4] = i_blocked;
-        field_[4][3] = i_blocked;
 
-        field_[5][5] = i_blocked;
-        field_[6][3] = i_blocked;
-
-        field_[7][5] = i_blocked;
-        field_[7][6] = i_blocked;
-
-        field_[finish_.x][finish_.y] = i_free;*/
     }
 
     void SetStartFinish()
@@ -369,22 +428,24 @@ private:
 
     ptrdiff_t** field_ = nullptr;
 
-    size_t height_ = 15;
-    size_t weight_ = 15;
+    size_t height_ = 10;
+    size_t weight_ = 10;
 
     size_t prev_height_ = height_;
     size_t prev_weight_ = height_;
-    size_t count_blocked_ = 30;
+    size_t count_blocked_ = 10;
 
-    Vertex start_pos_ = { 3,3 };
+    Vertex start_pos_ = { 2,2 };
     Vertex current_ = start_pos_; 
     Vertex prev_ = current_;
-    Vertex finish_ = { 7,13 };
+    Vertex finish_ = { 7,8 };
 
     ptrdiff_t i_blocked = -1;
     ptrdiff_t i_free = 0x9999F;
     size_t person = 0;
+    std::vector<std::string> logs_;
 };
+using namespace std::chrono_literals;
 
 class Game
 {
@@ -402,10 +463,14 @@ public:
             Button button;
             if (_kbhit())
             {
-                system("cls");
+                
                 button = ToButton(_getch());
-                DoButtonAction(button);
-                level_.Draw();
+                /* if (*/DoButtonAction(button);/*)*/
+                {
+                    system("cls");
+                    level_.Draw();
+                }
+                //std::this_thread::sleep_for(100ns);
             }
             else
             {
@@ -416,45 +481,76 @@ public:
 
 private:
 
-    void DoButtonAction(Button button)
+    bool DoButtonAction(Button button)
     {
         if (button == Button::eUndefined)
-            return;
-        static std::vector<std::pair<Vertex, size_t>> path;
+            return false;
+        bool ret = true;
+        static std::vector<Vertex> path;
         switch (button)
         {
         case Button::eUp:
         case Button::eDown:
         case Button::eRight:
         case Button::eLeft:
-            level_.SetCur(ButtoToDir(button));
+            ret = level_.SetCur(ButtoToDir(button));
             break;
         case Button::eRestart:
             level_.GenerateLevel();
             break;
+        case Button::eLeftUpCorner:
+            level_.SetCur({ 2,2 });
+            break;
         case Button::eX:
             {
-                if (level_.AlgorithmDFS(level_.GetCurrentPos(), level_.GetFinishPos(), path))
+                if (level_.AlgorithmBFS(level_.GetCurrentPos(),level_.GetFinishPos(), path))
                 {
                     for (auto& v : path)
-                        level_.SetCur(v.first,v.second);
+                        level_.SetCur(v);
                 }
                 else
                 {
-                    std::cout << "Best path can not be find\n";
+                    std::cout << "Best path form AlgorithmBFS can not be find\n";
                 }
                
 
             }
             break;
+        case Button::eD:
+        {
+            if (level_.AlgorithmDijkstra2(level_.GetCurrentPos(), level_.GetFinishPos(), path))
+            {
+                for (auto& v : path)
+                    level_.SetCur(v);
+            }
+            else
+            {
+                std::cout << "Best path form AlgorithmBFS can not be find\n";
+            }
+        }
+        break;
         case Button::eQ:
         {
             level_.ClearPath(path);
+            level_.SetCur(level_.GetCurrentPos());
+        }
+        break;
+        case Button::eTilda:
+        {
+            std::cout << "Input command: \n";
+            std::string str;
+            std::getline(std::cin, str);
+            auto words = Algorithms::String::Split(" ", str);
+            
+
         }
         break;
         default:
+            ret = false;
             break;
         }
+
+        return ret;
     }
 
     void Go(Button button)
