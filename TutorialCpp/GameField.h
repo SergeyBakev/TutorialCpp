@@ -6,7 +6,9 @@
 #include "Algortithms.h"
 #include <thread>
 #include <chrono>
-
+#include <sstream>
+#include <iostream>
+#include <fstream>
 
 struct Vertex
 {
@@ -80,13 +82,13 @@ public:
 
         current_.x = edge.vertex.x;
         current_.y = edge.vertex.y;
-
+        
         SetCur(prev_, i_free);
         SetCur(current_, person);
         
         if (current_ == finish_)
         {
-            std::cout << "Game finished\n";
+            logs_.push_back("Game finished\n");
             IncreaseDifficulty();
             GenerateLevel();
         }
@@ -111,11 +113,14 @@ public:
 
         
     }
+
     void GenerateLevel()
     {
         RemoveField();
         InitializeScene();
         CreateGraph();
+       
+        //UpdateScene();
         SetStartFinish();
     }
 
@@ -124,13 +129,18 @@ public:
         size_t max = std::numeric_limits<size_t>::max() - graph_.size() * 5;
         std::vector<std::tuple<Vertex,size_t, bool>> distances;
         std::map<Vertex, size_t> helper;
+        std::map<size_t,Vertex> helper2;
 
+        Vertex v = { 6,2 };
+        Vertex v2 = { 7,2 };
         size_t idx = 0;
-        
+        std::vector<Vertex> parents;
+        parents.resize(graph_.size());
         for (auto& [vertex, edges] : graph_)
         {
             distances.push_back({vertex,max,false});
-            helper.insert({ vertex,idx++});
+            helper.insert({ vertex,idx});
+            helper2.insert({ idx++,vertex });
         }
             
         //set start vertex distance
@@ -147,20 +157,33 @@ public:
             {
                 auto& [idx, distance_to_neighbor, is_neighbor_used] = distances[helper[neighbor.vertex]];
                 if (neighbor.weight + distance_to_min < distance_to_neighbor && !is_neighbor_used)
+                {
                     distance_to_neighbor = neighbor.weight + distance_to_min;
+                    parents[helper[neighbor.vertex]] = std::get<0>(min);
+                }
+                    
             }
         }
 
         path.clear();
         size_t cur_dist = std::get<1>(distances[helper[to]]);
-        if (cur_dist != max)
+        if (cur_dist == max)
+            return false;
+
+        Vertex parent = parents[helper[to]];
+        while (parent != from)
+        {
+            path.push_back(parent);
+            parent = parents[helper[parent]];
+            std::reverse(std::begin(path), std::end(path));
+        }
+        /*if (cur_dist != max)
         {
             Vertex pos = to;
             path.push_back(pos);
 
             while (cur_dist != 0)
             {
-
                 const auto& neighbors = graph_[pos];
                 for (const auto& neighbor : neighbors)
                 {
@@ -176,8 +199,8 @@ public:
             }
             std::reverse(std::begin(path), std::end(path));
             return true;
-        }
-        return false;
+        }*/
+        return true;
     }
 
     bool AlgorithmDFS(const Vertex& start, std::vector<std::pair<Vertex, size_t>>& path)
@@ -196,9 +219,10 @@ public:
     bool AlgorithmBFS(const Vertex& start, const Vertex& to, std::vector<Vertex>& path)
     {
         size_t max = std::numeric_limits<size_t>::max() - graph_.size() * 5;
-        std::deque<Vertex> queue;
+        std::queue<Vertex> queue;
         std::vector<bool> used(graph_.size(), false);
         std::vector<size_t> distance(graph_.size(), max);
+        path.clear();
         path.resize(graph_.size());
         std::map<Vertex, size_t> helper;
         std::map<size_t,Vertex> helper2;
@@ -213,20 +237,25 @@ public:
         //mark start as root node 
         distance[helper[start]] = 0;
         used[helper[start]] = true;
-        queue.push_back(start);
+        queue.push(start);
         while (!queue.empty())
         {
             Vertex u = queue.front();
-            queue.pop_front();
+            queue.pop();
             for (auto& neigbor : graph_[u])
             {
                 auto& v = neigbor.vertex;
                 if (not used[helper[v]])
                 {
+                    size_t idx1 = helper[v];
+                    size_t idx2 = helper[u];
+
+                    size_t dist = distance[helper[u]];
+
                     distance[helper[v]] = distance[helper[u]] + 1;
                     path[helper[v]] = u;
-                    queue.push_back(v);
-                    used[helper[u]] = true;
+                    queue.push(v);
+                    used[helper[v]] = true;
                 }
             }
         }
@@ -242,13 +271,22 @@ public:
             Vertex v = to;
             while (distance_to != 0)
             {
-                path.push_back(v);
                 --distance_to;
-                if (distance[distance_to] == max)
+                path.push_back(v);    
+                if (distance[helper[v]] == max)
                     return false;
 
-                size_t pos = Algorithms::Vector::IndexOf(distance, distance_to);
-                v = helper2[pos];
+                for (auto& neigbor : graph_[v])
+                {
+                    if (distance_to == distance[helper[neigbor.vertex]])
+                    {
+                        v = neigbor.vertex;
+                        break;
+                    }
+                }
+
+                /*size_t pos = Algorithms::Vector::IndexOf(distance, distance_to);
+                v = helper2[pos];*/
             }
         }
 
@@ -258,6 +296,62 @@ public:
     }
     Vertex GetCurrentPos() const { return current_; }
     Vertex GetFinishPos() const { return finish_; }
+
+    void Save(std::ofstream& fs)
+    {
+        fs << height_ << std::endl;
+        fs << weight_ << std::endl;
+        fs << prev_height_ << std::endl;
+        fs << prev_weight_ << std::endl;
+        fs << count_blocked_ << std::endl;
+        fs << start_pos_.x << std::endl;
+        fs << start_pos_.y << std::endl;
+        fs << finish_.x << std::endl;
+        fs << finish_.y << std::endl;
+        fs << current_.x << std::endl;
+        fs << current_.y << std::endl;
+        for (size_t i = 0; i < height_; i++)
+        {
+            for (size_t j = 0; j < weight_; j++)
+            {
+                fs << field_[i][j] << std::endl;
+            }
+        }
+    }
+
+    void Load(std::ifstream& fs)
+    {
+        size_t height;
+        size_t weight;
+        fs >> height;
+        fs >> weight;
+        if (height_ != height && weight_ != weight)
+        {
+            RemoveField();
+            AllocateField(height, weight);
+            height_ = height;
+            weight_ = weight;
+        }
+        fs >> prev_height_;
+        fs >> prev_weight_;
+        fs >> count_blocked_;
+        fs >> start_pos_.x;
+        fs >> start_pos_.y;
+        fs >> finish_.x;
+        fs >> finish_.y;
+        fs >> current_.x;
+        fs >> current_.y;
+        
+        for (size_t i = 0; i < height_; i++)
+        {
+            for (size_t j = 0; j < weight_; j++)
+            {
+                fs >> field_[i][j];
+            }
+        }
+        CreateGraph();
+        SetStartFinish();
+    }
 
 private:
 
@@ -305,12 +399,16 @@ private:
         }
     }
 
+    void AllocateField(size_t height, size_t weight)
+    {
+        field_ = new ptrdiff_t * [height];
+        for (size_t i = 0; i < height; i++)
+            field_[i] = new ptrdiff_t[weight];
+    }
+
     void InitializeScene()
     {
-        field_ = new ptrdiff_t * [height_ ];
-        for (size_t i = 0; i < height_; i++)
-            field_[i] = new ptrdiff_t[weight_];
-
+        AllocateField(height_, weight_);
         for (size_t i = 0; i < height_; i++)
         {
             for (size_t j = 0; j < weight_; j++)
@@ -383,6 +481,7 @@ private:
         const ptrdiff_t dx[4] = { 0,1,0,-1 };
         const ptrdiff_t dy[4] = { -1,0,1,0 };
         eDirection dir[4] = { eDirection::eLeft,eDirection::eDown,eDirection::eRight,eDirection::eUp };
+        srand((uint32_t)time(nullptr));
         for (size_t i = 0; i < height_; i++)
         {
             for (size_t j = 0; j < weight_; j++)
@@ -402,7 +501,8 @@ private:
                         size_t ny = j + dy[d];
                         if (field_[nx][ny] != i_blocked)
                         {
-                            it.first->second.push_back({ nx,ny });
+                            size_t weight = rand() % max_weigth_edge_;
+                            it.first->second.push_back({ nx,ny,weight });
                             gameField_[v].insert({ dir[d],{nx,ny} });
                         }
                     }
@@ -410,6 +510,17 @@ private:
             }
         }
        
+    }
+
+    void UpdateScene()
+    {
+        for (auto& [vertex, edges] : graph_)
+        {
+            for (auto& [edge_vertex, weight] : edges)
+            {
+                field_[edge_vertex.x][edge_vertex.y] = weight;
+            }
+        }
     }
 
     void IncreaseDifficulty()
@@ -422,23 +533,25 @@ private:
 
     }
 
+    
+
 private:
     std::map<Vertex, std::vector<Edge>> graph_;
     std::map<Vertex, std::map<eDirection, Edge>> gameField_;
 
     ptrdiff_t** field_ = nullptr;
-
-    size_t height_ = 10;
-    size_t weight_ = 10;
+    size_t max_weigth_edge_ = 100;
+    size_t height_ = 17;
+    size_t weight_ = 17;
 
     size_t prev_height_ = height_;
     size_t prev_weight_ = height_;
-    size_t count_blocked_ = 10;
+    size_t count_blocked_ = 25;
 
     Vertex start_pos_ = { 2,2 };
     Vertex current_ = start_pos_; 
     Vertex prev_ = current_;
-    Vertex finish_ = { 7,8 };
+    Vertex finish_ = { 14,15 };
 
     ptrdiff_t i_blocked = -1;
     ptrdiff_t i_free = 0x9999F;
@@ -480,6 +593,39 @@ public:
     }
 
 private:
+    void DoParseDeveloperCommand(Algorithms::StringVector& commands)
+    {
+        std::stringstream ss;
+        for (auto& v : commands)
+            ss << v << std::endl;
+
+        std::string command;
+        while (!ss.eof())
+        {
+            ss >> command;
+            if (command == "load")
+            {
+                ss >> command;
+                std::ifstream fs;
+                fs.open(command);
+                if (!fs.is_open())
+                    std::cout << "open fail fail\n";
+                level_.Load(fs);
+               
+            }
+            else if (command == "save")
+            {
+                ss >> command;
+                std::ofstream fs;
+                fs.open(command, std::ios::trunc | std::ios::out);
+                if (!fs.is_open())
+                    std::cout << "open fail fail\n";
+                level_.Save(fs);
+                fs.close();
+            }
+        }
+    }
+
 
     bool DoButtonAction(Button button)
     {
@@ -497,6 +643,7 @@ private:
             break;
         case Button::eRestart:
             level_.GenerateLevel();
+            path.clear();
             break;
         case Button::eLeftUpCorner:
             level_.SetCur({ 2,2 });
@@ -541,7 +688,7 @@ private:
             std::string str;
             std::getline(std::cin, str);
             auto words = Algorithms::String::Split(" ", str);
-            
+            DoParseDeveloperCommand(words);
 
         }
         break;
