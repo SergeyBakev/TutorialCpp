@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 #include <array>
 #include <map>
 #include <vector>
@@ -10,192 +11,12 @@
 #include "boost/graph/edge_list.hpp"
 #include <queue>
 
-namespace Task1
-{  
-    //построить матрицу смежности для множества M={1,2,3,5,6}
-    //x+y <= 6
-
-    using namespace std;
-    bool Func(size_t x, size_t y)
-    {
-        return (x + y) <= 6;
-    }
-
-    void BuildMatrixTask1()
-    {
-        std::array<size_t, 7> vertex = { 0,1,2,3,4,5,6 };
-        bool matrix[7][7]; //матрица смежности
-        std::map<size_t, std::vector<size_t>> list; //список смежных верших
-
-        for (size_t i = 0; i < vertex.size(); i++)
-        {
-            size_t vertex_i = vertex[i];
-            std::vector<size_t> v;
-            for (size_t j = 0; j < vertex.size(); j++)
-            {
-                
-                size_t vertex_j = vertex[j];
-                bool r = Func(vertex_i, vertex_j);
-                if(r)
-                    v.push_back(r);
-                matrix[vertex_i][vertex_j] = Func(vertex_i, vertex_j);
-               
-            }
-            list.insert({ vertex_i,v });
-
-        }
-
-        
-        for (size_t i = 0; i < vertex.size(); i++)
-        {
-            for (size_t j = 0; j < vertex.size(); j++)
-            {
-               cout << matrix[i][j] << "\t";
-            }
-            cout << endl;
-        }
-        cout <<"____________________________________"<< endl;
-        for (auto& it : list)
-        {
-            std::cout << it.first << ":\t";
-            for(auto& v : it.second)
-                std::cout << v << "\t";
-            cout << endl;
-        }
-
-    }
-}
-
 namespace NGraph
 {
-    /*class Graph
-    {
-    public:
-        using Matrix = std::vector<std::vector<double>>;
-        using Way = std::vector<size_t>;
-        using Neighbors = std::vector<std::pair<size_t, double>>;
-        using Vertex = size_t;
-
-        bool AddEdge(size_t from, size_t to, double weight = 1)
-        {
-            bool ret = false;
-            auto edge = std::make_pair(to, weight);
-            auto it = nodes_.find(from);
-            if ( it == std::end(nodes_))
-                it = nodes_.insert({ from,{} }).first;
-            
-            auto& vec = it->second;
-            if (auto vit = std::find(std::begin(vec), std::end(vec), edge); vit == std::end(vec))
-            {
-                vec.push_back(edge);
-                ret = true;
-            }
-
-            return ret;
-        }
-
-        const Neighbors& GetNeighbors(const size_t& vertex) const
-        {
-            return nodes_.at(vertex);
-        }
-
-
-        Matrix GetMatirx() const
-        {
-            Matrix matrix;
-            matrix.resize(nodes_.size());
-            for (auto& m : matrix)
-                m.resize(nodes_.size());
-
-            for (size_t i = 0; i < matrix.size(); i++)
-            {
-                auto& row = matrix[i];
-                auto& d = nodes_.at(i + 1);
-                for (auto& col : d)
-                {
-                    row[col.first-1] = col.second;
-                }
-            }
-
-            return matrix;
-        }
-        
-        Vertex GetCountVertexes() const { return nodes_.size(); }
-
-        size_t GetCountEdges() const
-        {
-            size_t cnt = 0;
-            for (auto& it : nodes_)
-            {
-                for (auto& edge : it.second)
-                    cnt++;
-            }
-
-            return cnt;
-        }
-
-        Way LeeSearchWay(size_t from, size_t to)
-        {
-            if (auto it = nodes_.find(to); it == std::end(nodes_))
-                return {};
-
-            if (auto it = nodes_.find(from); it == std::end(nodes_))
-                return {};
-
-
-        }
-
-    private:
-        std::map<size_t, Neighbors> nodes_;
-    };*/
-
-    
     namespace Test
     {
-      /*  void Test1();
-        void Test2();
-        void Test3Simple();
-        void Test4Path();*/
-        void Prima();
+       
 
-        void Main()
-        {
-            //Test1();
-            //Test2();    
-            //Test3Simple();
-            //Test4Path();
-            Prima();
-           
-        }
-
-
-        //graph
-        //*************2**************
-        //************/-\*************
-        //***********4***6************
-        //**********/*****\***********
-        //*********3<-->1**5**********
-        //****************************
-        void Test1()
-        {
-          /*  Graph graph_;
-            graph_.AddEdge(2, 4);
-            graph_.AddEdge(2, 6);
-            graph_.AddEdge(6, 5);
-
-            graph_.AddEdge(2, 4);
-
-            graph_.AddEdge(4, 3);
-            graph_.AddEdge(4, 1);
-
-            graph_.AddEdge(3, 1);
-            graph_.AddEdge(1, 3);
-
-            auto vertexes = graph_.GetCountVertexes();
-            auto edges = graph_.GetCountEdges();
-
-            return;*/
-        }
         struct Vertex1d
         {
             size_t x;
@@ -206,15 +27,32 @@ namespace NGraph
             }
         };
 
+        template<class _Ty, class Weight>
+
         struct Edge2
         {
-            
-        };
-        
+            using Vertex = std::remove_const_t<std::remove_reference_t<_Ty>>;
+            Vertex from;
+            Vertex to;
+            Weight weight;
 
-        void Prima()
+            bool operator<(const Edge2& other)
+            {
+                return weight < other.weight;
+            }
+        };
+
+        using VectorEdges1d = std::vector<Edge2<Vertex1d, size_t>>;
+
+        void Prima();
+        void Kruskal();
+        void Kruskal2();
+        void FDSU();
+
+        std::map<Vertex1d, std::vector<std::pair<Vertex1d, size_t>>> graph_;
+
+        void Main()
         {
-            std::map<Vertex1d, std::vector<std::pair<Vertex1d, size_t>>> graph_;
             graph_[{1}].push_back({ {2},6 });
             graph_[{1}].push_back({ {3},3 });
             graph_[{1}].push_back({ {5},9 });
@@ -258,15 +96,23 @@ namespace NGraph
             graph_[{8}].push_back({ {6},10 });
 
             graph_[{9}].push_back({ {10},4 });
-            graph_[{9}].push_back({ {3},1 });
+            graph_[{9}].push_back({ {8},1 });
             graph_[{9}].push_back({ {7},4 });
 
             graph_[{10}].push_back({ {2},9 });
             graph_[{10}].push_back({ {4},9 });
             graph_[{10}].push_back({ {6},7 });
-            graph_[{10}].push_back({ {8},3 });
+            graph_[{10}].push_back({ {8},5 });
             graph_[{10}].push_back({ {9},4 });
+           // Prima();
+            //FDSU();
+            Kruskal();
+            //Kruskal2();
+           
+        }
 
+        void Prima()
+        {
             //algorithm
             {
                 std::vector<bool> used(graph_.size(),false);
@@ -292,11 +138,10 @@ namespace NGraph
                     q.pop();
 
                     size_t v_idx = helper[v];
-                    spanning_tree.push_back(v);
                     if (used[v_idx])
                         continue;
-
-                    used[helper[{1}]] = true;
+                    spanning_tree.push_back(v);
+                    used[helper[v]] = true;
                     mst_weight += dst;
                     for (auto& [neighbor,weight] : graph_[v])
                     {
@@ -312,6 +157,208 @@ namespace NGraph
 
             }
            
+        }
+
+        VectorEdges1d SelectAllAdge()
+        {
+            VectorEdges1d edges;
+            for (auto& [vertex, neighbors]: graph_)
+            {
+                for (auto& neighbor : neighbors)
+                {
+                    edges.push_back({ vertex,neighbor.first,neighbor.second });
+                }
+            }
+
+            return edges;
+        }
+
+        class DSUBase
+        {
+        public:
+
+            DSUBase()
+            {
+                set_.resize(10, max);
+                rank_.resize(10, 1);
+            }
+
+            DSUBase(size_t size)
+            {
+                set_.resize(size, max);
+                rank_.resize(size, 1);
+            }
+
+            void MakeSet(size_t vertex)
+            {
+                if (set_.size() <= vertex)
+                {
+                    set_.resize(set_.size() * 2, max);
+                    rank_.resize(set_.size() * 2, 1);
+                }
+                set_[vertex] = vertex;
+                rank_[vertex] = 0;
+            }
+
+            size_t Find(size_t vertex) const
+            {
+                if (set_[vertex] == vertex || vertex  == max)
+                    return vertex;
+
+                return set_[vertex] = Find(set_[vertex]);
+            }
+
+            bool Check(size_t v1, size_t v2) const
+            {
+                return Find(v1) == Find(v2);
+            }
+
+            bool Union(size_t v1, size_t v2)
+            {
+                size_t ra = Find(v1);
+                size_t rb = Find(v2);
+                if (ra == rb)
+                    return false;
+
+                if (rank_[ra] < rank_[rb])
+                    std::swap(ra, rb);
+
+                set_[rb] = ra;
+                if (rank_[ra] == rank_[rb])
+                    ++rank_[ra];
+
+                return true;
+            }
+
+            std::vector<size_t> GetMaxSet() const
+            {
+
+            }
+
+        private:
+            mutable std::vector<size_t> set_;
+            std::vector<size_t> rank_;
+            size_t max = std::numeric_limits<size_t>::max();
+
+        };
+
+        template <class T>
+        class DSU2
+        {
+        public:
+            static constexpr size_t npos = -1;
+            DSU2(size_t size) : dsu(size)
+            {
+
+            }
+
+            bool MakeSet(const T& value)
+            {
+                const auto& [iterator,is_inserted] =  data2_.insert({ value, data2_.size()});
+                if (is_inserted)
+                    dsu.MakeSet(iterator->second);
+                
+               
+                return is_inserted;
+            }
+
+            size_t Find(const T& vertex) const
+            {
+                if (!data2_.contains(vertex))
+                    return npos;
+
+                return dsu.Find(data2_[vertex]);
+            }
+            
+            bool Union(const T& v1, const T& v2)
+            {
+                if (!data2_.contains(v1) || !data2_.contains(v2))
+                    return false;
+
+                return dsu.Union(data2_[v1], data2_[v2]);
+            }
+
+        
+
+        private:
+            DSUBase dsu;
+            std::map<T,size_t> data2_;
+            
+        };
+
+        void FDSU()
+        {
+            DSUBase dsu(14);
+            for (size_t i = 0; i < 14; i++)
+                dsu.MakeSet(i);
+
+            //first set
+            dsu.Union(0, 1);
+            dsu.Union(1, 2);
+            dsu.Union(2, 3);
+
+            //second set 
+            dsu.Union(4, 5);
+            dsu.Union(4, 6);
+
+            //thrid set
+            dsu.Union(7, 8);
+            dsu.Union(8, 9);
+            dsu.Union(9, 10);
+
+            //fourth set
+            dsu.Union(11, 12);
+            dsu.Union(11, 13);
+            
+            dsu.Union(4, 2);
+
+            dsu.Union(7, 11);
+
+            dsu.Union(2, 11);
+            return;
+        }
+
+        void Kruskal()
+        {
+            auto edges = SelectAllAdge();
+
+            std::sort(std::begin(edges), std::end(edges));
+            DSUBase dsu;
+            for (auto& [vertex, neighbor] : graph_)
+                dsu.MakeSet(vertex.x);
+            
+            size_t max_weight = 0;
+            for (auto& edge : edges)
+            {
+                if (dsu.Union(edge.from.x, edge.to.x))
+                {
+                    printf("from: %zu to: %zu weight: %zu\n", edge.from.x, edge.to.x, edge.weight);
+                    //std::cout << "from: " << edge.from.x << " to: " << edge.to.x << " weight: " << edge.weight << std::endl;
+                }
+            }
+            return;
+            /*std::function<bool(int,int)> merge = []*/
+        }
+
+        void Kruskal2()
+        {
+            auto edges = SelectAllAdge();
+            std::sort(std::begin(edges), std::end(edges));
+
+            DSU2<Vertex1d> dsu(graph_.size());
+            for (auto& [vertex, neighbor] : graph_)
+                dsu.MakeSet(vertex);
+            size_t max_weight = 0;
+            for (auto& edge : edges)
+            {
+                if (dsu.Union(edge.from, edge.to))
+                {
+                    printf("from: %zu to: %zu weight: %zu\n", edge.from.x, edge.to.x, edge.weight);
+                    max_weight += edge.weight;
+                }
+            }
+
+            return;
         }
     }
     
