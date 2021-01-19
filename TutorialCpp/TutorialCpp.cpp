@@ -365,12 +365,215 @@ namespace NGraph
 }
 
 
+namespace TBTree
+{
+    
+   /* class BTreeNode
+    {
+    public:
+
+    };
+
+    template <size_t N, class _Key, class _Value>
+    class BTree
+    {
+    public:
+
+        BTree()
+        {
+
+        }
+
+    private:
+        size_t t_ = N;
+    };*/
+
+    class BTree23Node : protected std::enable_shared_from_this<BTree23Node>
+    {
+    public:
+        friend class BTree23;
+        BTree23Node() 
+        {
+            for (size_t i = 0; i < keys_.size(); i++)
+                keys_[i] = 0;
+            
+            for (size_t i = 0; i < childs_.size(); i++)
+                childs_[i] = nullptr;
+        };
+
+    public:
+        bool const IsLeaf() const { return isLeaf_; }
+        
+    private:
+
+        static constexpr size_t t_ = 2;
+        std::array<size_t,2 * t_> keys_;
+        std::weak_ptr<BTree23Node> parent_;
+        std::array<std::shared_ptr<BTree23Node>, 2 * t_ + 1> childs_;
+        size_t count_ = 0;
+        size_t countSons_ = 0;
+        bool isLeaf_ = false;
+      
+    };
+
+    class BTree23
+    {
+    public:
+        using Node = BTree23Node;
+        using NodePtr = std::shared_ptr<BTree23Node>;
+
+        static NodePtr CreateNode()
+        {
+            return NodePtr(new BTree23Node());
+        }
+        NodePtr Insert(size_t key)
+        {
+            if (root_ == nullptr)
+            {
+                NodePtr newRoot = CreateNode();
+                newRoot->keys_[0] = key;
+                newRoot->count_ = 1;
+                newRoot->isLeaf_ = true;
+                root_ = newRoot;
+                return newRoot;
+            }
+            else
+            {
+                NodePtr node = root_;
+                constexpr size_t keysCnt = 2 * t_ - 1;
+                while (!node->IsLeaf())
+                {
+                    for (size_t i = 0; i <= keysCnt; i++)
+                    {
+                        if (node->keys_[i] != 0)
+                        {
+                            if (key < node->keys_[i])
+                            {
+                                node = node->childs_[i];
+                                break;
+                            }
+                        }
+
+                        if ((node->keys_[i + 1] == 0) && (key > node->keys_[i]))
+                        {
+                            node = node->childs_[i + 1];
+                            break;
+                        }
+                            
+                    }
+                }
+
+                DoInsert(key, node);
+
+                while (node->count_ == 2 * t_)
+                {
+                    DoRestruct(node);
+                    if (node == root_)
+                        break;
+                    
+                    if (!node->parent_.expired())
+                        node = node->parent_.lock();
+                }
+
+                return node;
+            }
+        }
+    private:
+
+        NodePtr DoInsert(size_t key, const NodePtr& node)
+        {
+            node->keys_[node->count_] = key;
+            ++node->count_;
+
+            constexpr size_t keysCnt = 2 * t_ - 1;
+            for (size_t i = 0; i < keysCnt; i++)
+            {
+                for (size_t j = i + 1; j <= keysCnt; j++)
+                {
+                    if ((node->keys_[i] != 0) && (node->keys_[j] != 0))
+                    {
+                        if ((node->keys_[i]) > (node->keys_[j]))
+                        {
+                            std::swap(node->keys_[i], node->keys_[j]);
+                           
+                        }
+                    }
+                    else break;
+                }
+            }
+            return node;
+        }
+
+        void DoRestruct(const NodePtr& node)
+        {
+            if (node->count_ < (2 * t_ - 1)) return;
+
+            NodePtr child1 = CreateNode();
+            
+            int j;
+            for (j = 0; j <= t_ - 2; j++) child1->keys_[j] = node->keys_[j];
+            for (j = t_ - 1; j <= (2 * t_ - 1); j++) child1->keys_[j] = 0;
+            child1->count_ = t_ -1;
+
+            NodePtr child2 = CreateNode();
+            for (int j = 0; j <= (t_ - 1); j++) child2->keys_[j] = node->keys_[j + t_];
+            for (int j = t_; j <= (2 * t_ - 1); j++) child2->keys_[j] = 0;
+            child1->count_ = t_;
+
+            if (node->countSons_ != 0)
+            {
+                
+                
+            }
+            else
+            {
+                child2->isLeaf_ = true;
+                child2->countSons_ = 0;
+
+                child2->isLeaf_ = true;
+                child2->countSons_ = 0;
+            }
+
+            if (!node->parent_.lock())
+            {
+                node->keys_[0] = node->keys_[t_ - 1];
+
+                for (int j = 1; j <= (2 * t_ - 1); j++) node->keys_[j] = 0;
+
+                node->childs_[0] = child1;
+                node->childs_[1] = child2;
+                node->isLeaf_ = false;
+                node->count_ = 1;
+                node->countSons_ = 2;
+                child1->parent_ = node;
+                child2->parent_ = node;
+            }
+        }
+    private:
+        static constexpr size_t t_ = 2;
+        NodePtr root_;
+    };
+}
 
 
-
+using namespace TBTree;
 int main()
 {
-    NGraph::Test::Main();
+    BTree23 tree;
+    tree.Insert(100); //1
+    tree.Insert(50); //2
+    tree.Insert(25); //2
 
+    tree.Insert(70); //3
+
+
+
+
+
+
+
+
+    return 0;
+    //TBTree::BTree<2,size_t,size_t> tree;
 }
 
