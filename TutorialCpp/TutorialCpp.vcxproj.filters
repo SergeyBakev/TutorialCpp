@@ -21,6 +21,9 @@
     <ClCompile Include="Graph.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="kdtree.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Algortithms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kdtree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

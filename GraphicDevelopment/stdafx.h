@@ -1,0 +1,17 @@
+#pragma once
+#include <GL/glew.h>
+#include <Gl/GLU.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+#include <vector>
+#include <stdexcept>
+#include <Windows.h>
+#include <thread>
+#include <chrono>
+#include <fstream>
+#include <sstream>
+#include <map>
+#include <math.h>
+#include <iostream>
+#include <string_view>
