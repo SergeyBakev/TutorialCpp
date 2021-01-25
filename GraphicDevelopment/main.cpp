@@ -611,7 +611,7 @@ private:
 };
 
 static Camera2D camera{ glm::vec3(0,0,-3),70.0f,(float)WIDTH / (float)HEIGHT,0.01f,1000.f };
-
+glm::mat4 modelMatrix = glm::mat4(1.0f);
 
 void scroled(GLFWwindow* win, double xoffset, double yoffset)
 {
@@ -619,7 +619,8 @@ void scroled(GLFWwindow* win, double xoffset, double yoffset)
 
     std::cout << xoffset << "\t" << yoffset << std::endl;
     double zoom = 1 * yoffset;
-    camera.Scale(zoom);
+    //camera.Scale(zoom);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f, 1.1f, 1.0f));
     window->SwapBuffer();
     return;
 }
@@ -642,33 +643,15 @@ int main()
     glfwSetMouseButtonCallback(window.Handle(), mouse_callback);
     glfwSetScrollCallback(window.Handle(), scroled);
 
-
-    /*scene.Add(std::make_shared<GSquare2D>(
-        std::make_shared<GPoint2D>(-0.5, 0.5),
-        std::make_shared<GPoint2D>(0.5, 0.5),
-        std::make_shared<GPoint2D>(-0.5, -0.5),
-        std::make_shared<GPoint2D>(0.5, -0.5)
-        ));*/
-
-    GLdouble vertexes[] = {
-        .0,   0.5 , .0
-        -0.5, -0.5, .0,
-        0.5,  -0.5, .0
-    };
     GLfloat colors[] = { 1.0f,0.f,0.f };
-    //scene.Add(std::make_shared<GPoint2D>(-0.5, 0.5));
-    //scene.Add(std::make_shared<GPoint2D>(0.5, 0.5));
-    //scene.Add(std::make_shared<GPoint2D>(-0.5, -0.5));
-    //scene.Add(std::make_shared<GPoint2D>(0.5, -0.5));
-    glm::mat4 view = glm::mat4(1.0f);
-    auto m = glm::mat4(1.0f);
-   
+    glm::mat4 viewMatrix = glm::mat4(1.0f);
+    glm::mat4 projectionMatrix = glm::ortho(.0f, (float)WIDTH, .0f, (float)HEIGHT,-100.0f,100.0f);
 
-    static const GLfloat g_vertex_buffer_data[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.5f,  0.5f, 0.0f,
-    -0.5f,  0.5f, 0.0f,
+    const GLfloat g_vertex_buffer_data[] =
+    {
+        200.0f,200,.0f,
+        200.0f,600.0f,.0f,
+        400,200.0f,.0f,
     };
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -695,14 +678,19 @@ int main()
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glPointSize(10);
+    shader->Use();
+
+    shader->SetMatrix4("projection", projectionMatrix);
     while (!window.IsShouldClose())
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1,1,0,1);
-        shader->Use();
+        shader->SetMatrix4("model", modelMatrix);
         glBindVertexArray(vao);
-        glDrawArrays(GL_QUADS, 0, 4); // Начиная с вершины 0, всего 3 вершины -> один треугольник
+        glPushMatrix();
+        glDrawArrays(GL_TRIANGLES, 0, 3); // Начиная с вершины 0, всего 3 вершины -> один треугольник
+        glPopMatrix();
         //scene.Render();
         window.SwapBuffer();
 
