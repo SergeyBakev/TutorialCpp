@@ -30,6 +30,7 @@ namespace GraphicPrimitice
     class GraphicElementBase : public GraphicElement
     {
     public:
+
         virtual void Draw() override
         {
             GLuint vao;
@@ -47,7 +48,7 @@ namespace GraphicPrimitice
 
             OnDraw();
 
-            glBindVertexArray(0);
+            glDeleteVertexArrays(1, &vao);
         }
 
         virtual void Draw2() override
@@ -101,11 +102,15 @@ namespace GraphicPrimitice
     class GPoint2D : public GPoint
     {
     public:
+
         GPoint2D(double x, double y)
         {
             pnt_.x_ = x;
             pnt_.y_ = y;
         }
+
+        Point2D GetPointCord() const { return pnt_; }
+
     protected:
         virtual void OnDraw() override
         {
@@ -140,6 +145,47 @@ namespace GraphicPrimitice
         Point2D pnt_;
     };
 
+    using GPoint2DPtr = std::shared_ptr<GPoint2D>;
+
+    
+    class GSquare2D : public GraphicElementBase
+    {
+    public:
+        GSquare2D(GPoint2DPtr p1, GPoint2DPtr p2, GPoint2DPtr p3, GPoint2DPtr p4) : GraphicElementBase({1.0,1.0,1.0})
+        {
+            points_.push_back(p1);
+            points_.push_back(p2);
+            points_.push_back(p3);
+            points_.push_back(p4);
+        }
+
+    protected:
+        virtual void OnDraw2() override
+        {
+
+        }
+
+        virtual void OnDraw() override
+        {
+            GLuint vbo;
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, ArraySize(),points_.data(), GL_DYNAMIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, nullptr);
+            glEnableVertexAttribArray(0);
+            glPointSize(10);
+            glDrawArrays(GL_POINTS, 0, 4);
+            
+        };
+    private:
+        GLsizeiptr ArraySize() const
+        {
+            return points_.size() * sizeof(Point2D);
+        }
+    private:
+        std::vector<GPoint2DPtr> points_;
+    };
 
     class GCGraphicScene
     {
@@ -188,7 +234,7 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
         double cur_x_pos;
         double cur_y_pos;
         glfwGetCursorPos(window, &cur_x_pos, &cur_y_pos);
-        scene.Add(std::make_shared<GPoint2D>(cur_x_pos, cur_y_pos));
+        //scene.Add(std::make_shared<GPoint2D>(cur_x_pos, cur_y_pos));
     }
 }
 
@@ -217,6 +263,29 @@ public:
         id_ = other.id_;
         other.id_ = 0;
     }
+
+    void SetMatrix4(std::string_view name, const glm::mat4& matrix)
+    {
+        glUniformMatrix4fv(glGetUniformLocation(id_, name.data()), 1, GL_FALSE, glm::value_ptr(matrix));
+    }
+
+    GLuint GetAtribLocation(std::string_view name) const
+    {
+        return glGetAttribLocation(id_, name.data());
+    }
+
+    void SetAtribLocation(GLuint pos, std::string_view name)
+    {
+        if(GetAtribLocation(name) != -1)
+            glBindAttribLocation(id_, pos, name.data());
+    }
+
+    void SetAtribsLocation(std::initializer_list < std::pair<GLuint, std::string>> conventions)
+    {
+        for (auto& conv : conventions)
+            SetAtribLocation(conv.first, conv.second);
+    }
+
     void Destroy()
     {
         isDestoroyed_ = true;
@@ -250,20 +319,6 @@ private:
 };
 
 using ShaderProgramPtr = std::shared_ptr<ShaderProgram>;
-
-struct OldShaderAttribConvention 
-{
-    static void Convention(const ShaderProgramPtr& shader, GLuint pos,std::string_view variableName)
-    {
-        glBindAttribLocation(shader->Id(), pos, variableName.data());
-    }
-
-    static void Conventions(const ShaderProgramPtr& shader, std::initializer_list < std::pair<GLuint, std::string>> conventions)
-    {
-        for (auto& conv : conventions)
-            Convention(shader, conv.first, conv.second);
-    }
-};
 
 std::string LoadFileCode(std::string_view file)
 {
@@ -572,8 +627,8 @@ void scroled(GLFWwindow* win, double xoffset, double yoffset)
 
 int main()
 {
-    std::string vertexShaderFile = "Shaders\\simple_vertex_shader.txt";
-    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.txt";
+    std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
+    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
     GWindow2d window(WIDTH, HEIGHT, "Test");
 
     auto manager = ResourceManager::Instance();
@@ -581,30 +636,74 @@ int main()
     if (shader == nullptr)
         return -1;
 
-    OldShaderAttribConvention::Conventions(shader, { {0,"vertex_pos"s},{1,"vertex_color"s} });
+    shader->SetAtribsLocation({ {0,"vertex_pos"s},{1,"vertex_color"s} });
    
     glfwSetCursorPosCallback(window.Handle(), cursor_moved);
     glfwSetMouseButtonCallback(window.Handle(), mouse_callback);
     glfwSetScrollCallback(window.Handle(), scroled);
 
-    scene.Add(std::make_shared<GPoint2D>(-0.5, 0.5));
-    scene.Add(std::make_shared<GPoint2D>(0.5, 0.5));
-    scene.Add(std::make_shared<GPoint2D>(-0.5, -0.5));
-    scene.Add(std::make_shared<GPoint2D>(0.5, -0.5));
-    GLuint projectionID = glGetUniformLocation(shader->Id(), "projection");
-    GLuint viewID = glGetUniformLocation(shader->Id(), "view");
-   
+
+    /*scene.Add(std::make_shared<GSquare2D>(
+        std::make_shared<GPoint2D>(-0.5, 0.5),
+        std::make_shared<GPoint2D>(0.5, 0.5),
+        std::make_shared<GPoint2D>(-0.5, -0.5),
+        std::make_shared<GPoint2D>(0.5, -0.5)
+        ));*/
+
+    GLdouble vertexes[] = {
+        .0,   0.5 , .0
+        -0.5, -0.5, .0,
+        0.5,  -0.5, .0
+    };
+    GLfloat colors[] = { 1.0f,0.f,0.f };
+    //scene.Add(std::make_shared<GPoint2D>(-0.5, 0.5));
+    //scene.Add(std::make_shared<GPoint2D>(0.5, 0.5));
+    //scene.Add(std::make_shared<GPoint2D>(-0.5, -0.5));
+    //scene.Add(std::make_shared<GPoint2D>(0.5, -0.5));
     glm::mat4 view = glm::mat4(1.0f);
+    auto m = glm::mat4(1.0f);
+   
+
+    static const GLfloat g_vertex_buffer_data[] = {
+    -0.5f, -0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+    0.5f,  0.5f, 0.0f,
+    -0.5f,  0.5f, 0.0f,
+    };
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint vertexbuffer;
+    GLuint colors_vbo = 0;
+
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    
+    
+    glGenBuffers(1, &colors_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), &colors, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glPointSize(10);
     while (!window.IsShouldClose())
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        auto m = camera.GetViewProjection();
-        glUniformMatrix4fv(projectionID, 1, GL_FALSE, &m[0][0]);
-        glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
+        glClearColor(1,1,0,1);
         shader->Use();
-        scene.Render();
+        glBindVertexArray(vao);
+        glDrawArrays(GL_QUADS, 0, 4); // Начиная с вершины 0, всего 3 вершины -> один треугольник
+        //scene.Render();
         window.SwapBuffer();
 
         //glfwSwapBuffers(window);   

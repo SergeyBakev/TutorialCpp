@@ -167,8 +167,8 @@
     <ClInclude Include="Window\Window2dManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Shaders\simple_fragment_shader.txt" />
-    <Text Include="Shaders\simple_vertex_shader.txt" />
+    <None Include="Shaders\simple_fragment_shader.glsl" />
+    <None Include="Shaders\simple_vertex_shader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

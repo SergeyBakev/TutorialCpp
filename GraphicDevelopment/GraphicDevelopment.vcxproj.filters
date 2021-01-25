@@ -55,11 +55,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Shaders\simple_fragment_shader.txt">
+    <None Include="Shaders\simple_fragment_shader.glsl">
       <Filter>Shaders</Filter>
-    </Text>
-    <Text Include="Shaders\simple_vertex_shader.txt">
+    </None>
+    <None Include="Shaders\simple_vertex_shader.glsl">
       <Filter>Shaders</Filter>
-    </Text>
+    </None>
   </ItemGroup>
 </Project>
