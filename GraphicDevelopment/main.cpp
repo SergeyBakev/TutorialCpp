@@ -122,9 +122,7 @@ namespace GraphicPrimitice
         {
             GPoint::OnDraw2();
 
-            glBegin(GL_POINTS);
-            glVertex3d(pnt_.x_, pnt_.y_, pnt_.z_);
-            glEnd();
+            DrawPoint();
         }
 
 
@@ -139,52 +137,51 @@ namespace GraphicPrimitice
             glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, 0);
             glEnableVertexAttribArray(0);
             glPointSize(10);
-            glDrawArrays(GL_POINTS, 0, 3);
+            glDrawArrays(GL_POINTS, 0, 1);
         }
     private:
         Point2D pnt_;
     };
 
     using GPoint2DPtr = std::shared_ptr<GPoint2D>;
-
-    
-    class GSquare2D : public GraphicElementBase
+   
+    class GPolygon : public GraphicElementBase
     {
     public:
-        GSquare2D(GPoint2DPtr p1, GPoint2DPtr p2, GPoint2DPtr p3, GPoint2DPtr p4) : GraphicElementBase({1.0,1.0,1.0})
+        GPolygon() : GraphicElementBase({0.0,0.0,0.0})
         {
-            points_.push_back(p1);
-            points_.push_back(p2);
-            points_.push_back(p3);
-            points_.push_back(p4);
+
+        }
+
+        void AddPoint(float x, float y, float z = 1)
+        {
+            vertexes_.push_back(x);
+            vertexes_.push_back(y);
+            vertexes_.push_back(z);
         }
 
     protected:
+        virtual void OnDraw() override
+        {
+            GLuint vertexbuffer;
+            glGenBuffers(1, &vertexbuffer);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+            glBufferData(GL_ARRAY_BUFFER, vertexes_.size() * sizeof(float), vertexes_.data(), GL_STATIC_DRAW);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glEnableVertexAttribArray(0);
+
+            glDrawArrays(GL_POLYGON, 0, vertexes_.size() / 3);
+        }
+
         virtual void OnDraw2() override
         {
 
         }
-
-        virtual void OnDraw() override
-        {
-            GLuint vbo;
-            glGenBuffers(1, &vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, ArraySize(),points_.data(), GL_DYNAMIC_DRAW);
-
-            glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(0);
-            glPointSize(10);
-            glDrawArrays(GL_POINTS, 0, 4);
-            
-        };
     private:
-        GLsizeiptr ArraySize() const
-        {
-            return points_.size() * sizeof(Point2D);
-        }
-    private:
-        std::vector<GPoint2DPtr> points_;
+        std::vector<float> vertexes_;
     };
 
     class GCGraphicScene
@@ -212,6 +209,14 @@ namespace GraphicPrimitice
 
         std::vector<GraphicElementPtr> elements_;
     };
+
+
+    template <class T>
+    std::shared_ptr<T> gobject_to_ptr(T& obj)
+    {
+        
+        return std::make_shared<T>(obj);
+    }
 }
 
 using  namespace GraphicPrimitice;
@@ -227,16 +232,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 }
 
-void mouse_callback(GLFWwindow* window, int button, int action, int mods)
-{
-    if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
-    {
-        double cur_x_pos;
-        double cur_y_pos;
-        glfwGetCursorPos(window, &cur_x_pos, &cur_y_pos);
-        //scene.Add(std::make_shared<GPoint2D>(cur_x_pos, cur_y_pos));
-    }
-}
+
 
 class ILogger
 {
@@ -532,37 +528,44 @@ private:
     ShaderProgramMap shaders_map_;
 
 };
-float angle = 0.0f;
-float scale = 0.0f;
 
-void DrawGrid()
-{   
-    {
-        glPushMatrix();
-        glColor3f(1.0, 0.0, 0.0);
-       
-        scale = 1.0 - abs(sin(3.14 * angle / 90.0) / sqrt(3.0) / 2);
-        glRotatef(angle += 0.09, 0, 0, 1);
-        glScalef(scale, scale, 1);
-        glBegin(GL_LINES);
-        for (float i = -WIDTH / 2; i <= WIDTH / 2; i += 20.0)
-        {
-            glVertex2f(i, -HEIGHT / 2);
-            glVertex2f(i, HEIGHT / 2);
-        }
-        for (float i = -HEIGHT / 2; i <= HEIGHT / 2; i += 20.0)
-        {
-            glVertex2f(-WIDTH / 2, i);
-            glVertex2f(WIDTH / 2, i);
-        }
-        glEnd();
-        glPopMatrix();
-    }
-}
+float angle = 0.0f;
+glm::mat4 scaleMatrix = glm::identity<glm::mat4>();
+
+
+//void DrawGrid()
+//{   
+//    {
+//        glPushMatrix();
+//        glColor3f(1.0, 0.0, 0.0);
+//       
+//        scale = 1.0 - abs(sin(3.14 * angle / 90.0) / sqrt(3.0) / 2);
+//        glRotatef(angle += 0.09, 0, 0, 1);
+//        glScalef(scale, scale, 1);
+//        glBegin(GL_LINES);
+//        for (float i = -WIDTH / 2; i <= WIDTH / 2; i += 20.0)
+//        {
+//            glVertex2f(i, -HEIGHT / 2);
+//            glVertex2f(i, HEIGHT / 2);
+//        }
+//        for (float i = -HEIGHT / 2; i <= HEIGHT / 2; i += 20.0)
+//        {
+//            glVertex2f(-WIDTH / 2, i);
+//            glVertex2f(WIDTH / 2, i);
+//        }
+//        glEnd();
+//        glPopMatrix();
+//    }
+//}
+
+//GLfloat colors[] = { 1.0f,0.f,0.f };
+
+GLfloat colors2[] = { 0.0f,0.f,0.f };
+GLfloat colors[] = { 0.0f,0.f,0.f };
 
 void DrawAxis()
 {
-    glPushMatrix();
+    /*glPushMatrix();
     glColor3f(1.0, 0.0, 0.0);
     glPointSize(10);
     glBegin(GL_LINES);
@@ -571,12 +574,39 @@ void DrawAxis()
     glVertex2f(-1,0);
     glVertex2f(1, 0);
     glEnd();
-    glPopMatrix();
+    glPopMatrix();*/
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint vertexbuffer;
+    GLuint colors_vbo = 0;
+    GLfloat xAxis[]{ 400.0f,.0f,.0f, 400.0f,800.0f,.0f, .0f,400.0f,0.f,800.0f,400.0f,.0f};
+
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(xAxis), xAxis, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &colors_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors2), &colors2, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    glDrawArrays(GL_LINES, 0, 4); // Начиная с вершины 0, всего 3 вершины -> один треугольник
 }
 
 void cursor_moved(GLFWwindow* win, double xpos,  double ypos)
 {
-    //std::cout << xpos << "\t" << ypos << std::endl;
+    std::cout << xpos << "\t" << ypos << std::endl;
 }
 
 
@@ -611,21 +641,64 @@ private:
 };
 
 static Camera2D camera{ glm::vec3(0,0,-3),70.0f,(float)WIDTH / (float)HEIGHT,0.01f,1000.f };
-glm::mat4 modelMatrix = glm::mat4(1.0f);
+glm::mat4 modelMatrix = glm::identity<glm::mat4>();
+glm::mat4 viewMatrix = glm::identity<glm::mat4>();
+glm::mat4 projectionMatrix = glm::identity<glm::mat4>();
+float fovy = 45;
+float scale = 1.1f;
 
 void scroled(GLFWwindow* win, double xoffset, double yoffset)
 {
     GWindow2d* window = GWindow2dManger::Instanse()->GetWindow(win);
 
     std::cout << xoffset << "\t" << yoffset << std::endl;
-    double zoom = 1 * yoffset;
+    double zoom = 1.1 * yoffset;
+    
     //camera.Scale(zoom);
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f, 1.1f, 1.0f));
+    //projectionMatrix = glm::perspective(fovy++, 1.f, 0.f, 100.f);
+    if (yoffset == 1)
+    {
+        modelMatrix = modelMatrix * scaleMatrix;
+        
+    }
+    else
+    {
+        modelMatrix = modelMatrix * glm::inverse(scaleMatrix);
+    }
     window->SwapBuffer();
     return;
 }
 
+void mouse_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+    {
+        double cur_x_pos;
+        double cur_y_pos;
+        glfwGetCursorPos(window, &cur_x_pos, &cur_y_pos);
+        scene.Add(std::make_shared<GPoint2D>(cur_x_pos, cur_y_pos));
+    }
+}
 
+void print(glm::mat4& m)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            std::cout << m[i][j] << "\t\t";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void print(glm::vec4& vec)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        std::cout << vec[i] << "\t\t";
+    }
+}
 int main()
 {
     std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
@@ -638,60 +711,63 @@ int main()
         return -1;
 
     shader->SetAtribsLocation({ {0,"vertex_pos"s},{1,"vertex_color"s} });
-   
+    scaleMatrix = glm::scale(scaleMatrix, glm::vec3(1.05f, 1.05f, 1.f));
     glfwSetCursorPosCallback(window.Handle(), cursor_moved);
     glfwSetMouseButtonCallback(window.Handle(), mouse_callback);
     glfwSetScrollCallback(window.Handle(), scroled);
 
-    GLfloat colors[] = { 1.0f,0.f,0.f };
-    glm::mat4 viewMatrix = glm::mat4(1.0f);
-    glm::mat4 projectionMatrix = glm::ortho(.0f, (float)WIDTH, .0f, (float)HEIGHT,-100.0f,100.0f);
+    auto orto = glm::ortho(0.f, (float)WIDTH, 0.f, (float)HEIGHT, 0.f, 110.f);
+    std::cout << "orto matrix\n";
+    print(orto);
+    std::cout << "proj matrix translated\n";
+    print(projectionMatrix);
+    //projectionMatrix = glm::translate(projectionMatrix,glm::vec(-1.f, 1.f, 1.f);
+    projectionMatrix *= glm::ortho(0.f, (float)WIDTH, 0.f, (float)HEIGHT,0.f,110.f);
 
-    const GLfloat g_vertex_buffer_data[] =
-    {
-        200.0f,200,.0f,
-        200.0f,600.0f,.0f,
-        400,200.0f,.0f,
-    };
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    GLuint vertexbuffer;
-    GLuint colors_vbo = 0;
-
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
     
-    
-    glGenBuffers(1, &colors_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), &colors, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    std::cout << "proj* orto matrix\n";
+    print(projectionMatrix);
 
-    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+    auto point = glm::vec4(200.0f, 200.f, 0.f, 1.f);
+    std::cout << "point\n";
+    print(point);
+    std::cout << std::endl;
+    auto test = projectionMatrix * point;
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+    std::cout << " projectionMatrix * point\n";
+    print(test);
+    std::cout << std::endl;
     glPointSize(10);
     shader->Use();
-
-    shader->SetMatrix4("projection", projectionMatrix);
+    //modelMatrix = glm::translate(modelMatrix,glm::vec3(1.5f, 0.0f, -7.0f));
+    GPolygon poly;
+    GPoint2D pnt1(200.0f, 200.f);
+    GPoint2D pnt2(400.0f, 200.f);
+    GPoint2D pnt3(600.0f, 500.f);
+    GPoint2D pnt4(700.0f, 600.f);
+   /* poly.AddPoint(200.0f, 400.f, .0f);
+    poly.AddPoint(400.0f, 200.f, .0f);
+    poly.AddPoint(600.0f, 500.f, .0f);
+    poly.AddPoint(700.0f, 600.f, .0f);*/
+    scene.Add(gobject_to_ptr(pnt1));
+    //scene.Add(gobject_to_ptr(pnt2));
+    //scene.Add(gobject_to_ptr(pnt3));
+    //scene.Add(gobject_to_ptr(pnt4));
     while (!window.IsShouldClose())
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1,1,0,1);
+
+        shader->SetMatrix4("projection", projectionMatrix);
         shader->SetMatrix4("model", modelMatrix);
-        glBindVertexArray(vao);
-        glPushMatrix();
-        glDrawArrays(GL_TRIANGLES, 0, 3); // Начиная с вершины 0, всего 3 вершины -> один треугольник
-        glPopMatrix();
-        //scene.Render();
+        shader->SetMatrix4("view", viewMatrix);
+       
+        //DrawAxis();
+
+        
+        scene.Render();
         window.SwapBuffer();
 
         //glfwSwapBuffers(window);   

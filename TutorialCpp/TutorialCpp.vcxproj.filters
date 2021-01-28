@@ -41,6 +41,9 @@
     <ClInclude Include="kdtree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GraphAlogrithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
