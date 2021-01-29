@@ -4,6 +4,7 @@
 #include "Window/Window2dManager.h"
 #define HEIGHT 800
 #define WIDTH  800
+
 namespace GraphicPrimitice
 {
     class GraphicElement
@@ -173,7 +174,7 @@ namespace GraphicPrimitice
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
             glEnableVertexAttribArray(0);
 
-            glDrawArrays(GL_POLYGON, 0, vertexes_.size() / 3);
+            glDrawArrays(GL_LINE_LOOP, 0, vertexes_.size() / 3);
         }
 
         virtual void OnDraw2() override
@@ -382,7 +383,9 @@ public:
 
     ShaderProgramPtr GetShader(const std::string& shaderName)
     {
-        return shaders_map_.contains(shaderName) ? shaders_map_[shaderName] : nullptr;
+        const auto& it = shaders_map_.find(shaderName);
+        
+        return std::end(shaders_map_) != it ? shaders_map_[shaderName] : nullptr;
     }
     
 private:
@@ -531,7 +534,7 @@ private:
 
 float angle = 0.0f;
 glm::mat4 scaleMatrix = glm::identity<glm::mat4>();
-
+bool isMousePresed = false;
 
 //void DrawGrid()
 //{   
@@ -604,10 +607,7 @@ void DrawAxis()
     glDrawArrays(GL_LINES, 0, 4); // Начиная с вершины 0, всего 3 вершины -> один треугольник
 }
 
-void cursor_moved(GLFWwindow* win, double xpos,  double ypos)
-{
-    std::cout << xpos << "\t" << ypos << std::endl;
-}
+
 
 
 class Camera2D
@@ -675,8 +675,21 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
     {
         double cur_x_pos;
         double cur_y_pos;
-        glfwGetCursorPos(window, &cur_x_pos, &cur_y_pos);
-        scene.Add(std::make_shared<GPoint2D>(cur_x_pos, cur_y_pos));
+        isMousePresed = true;
+        //glfwGetCursorPos(window, &cur_x_pos, &cur_y_pos);
+        //scene.Add(std::make_shared<GPoint2D>(cur_x_pos, cur_y_pos));
+    }
+    if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
+    {
+        isMousePresed = false;
+    }
+}
+
+void cursor_moved(GLFWwindow* win, double xpos, double ypos)
+{
+    if (isMousePresed)
+    {
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(1.f,1.f,1.f));
     }
 }
 
@@ -699,6 +712,36 @@ void print(glm::vec4& vec)
         std::cout << vec[i] << "\t\t";
     }
 }
+
+
+//glm::vec3 ChangeBasis(const glm::vec3& v, const glm::vec3& e1, const glm::vec3& e2, const glm::vec3& e3)
+//{   
+//    Eigen::Matrix3f matrix;
+//    matrix.setZero();
+//    size_t offset = sizeof(float) * 3;
+//    const float* p1 = glm::value_ptr(e1);
+//    memcpy(matrix.data(), p1, offset);
+//    const float* p2 = glm::value_ptr(e2);
+//    memcpy(matrix.data() + 3, p2, offset);
+//    const float* p3 = glm::value_ptr(e3);
+//    memcpy(matrix.data() + 2 * 3, p3, offset);
+//    if (matrix.determinant() != 0)
+//    {
+//        Eigen::Vector3f a;
+//        a.setZero();
+//        const float* p4 = glm::value_ptr(v);
+//        memcpy(a.data(), p4, offset);
+//        std::cout << a << std::endl;
+//        Eigen::Vector3f solve = matrix.colPivHouseholderQr().solve(a);
+//        std::cout << solve << std::endl;
+//        glm::vec3 ret(0);
+//        memcpy(solve.data(), glm::value_ptr(ret), 3);
+//        return ret;
+//    }
+//
+//    return{};
+//}
+
 int main()
 {
     std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
@@ -715,62 +758,51 @@ int main()
     glfwSetCursorPosCallback(window.Handle(), cursor_moved);
     glfwSetMouseButtonCallback(window.Handle(), mouse_callback);
     glfwSetScrollCallback(window.Handle(), scroled);
-
-    auto orto = glm::ortho(0.f, (float)WIDTH, 0.f, (float)HEIGHT, 0.f, 110.f);
-    std::cout << "orto matrix\n";
-    print(orto);
-    std::cout << "proj matrix translated\n";
-    print(projectionMatrix);
     //projectionMatrix = glm::translate(projectionMatrix,glm::vec(-1.f, 1.f, 1.f);
-    projectionMatrix *= glm::ortho(0.f, (float)WIDTH, 0.f, (float)HEIGHT,0.f,110.f);
-
+    projectionMatrix *= glm::ortho(-(float)WIDTH / 2.f, (float)WIDTH / 2.f, -(float)WIDTH / 2.f, (float)WIDTH / 2.f, -1.f, 1.f);
+    //projectionMatrix = glm::ortho(0.f, (float)WIDTH, 0.f, (float)HEIGHT,0.f,1.f);
     
-
-    std::cout << "proj* orto matrix\n";
-    print(projectionMatrix);
-
-    auto point = glm::vec4(200.0f, 200.f, 0.f, 1.f);
-    std::cout << "point\n";
-    print(point);
-    std::cout << std::endl;
-    auto test = projectionMatrix * point;
-
-    std::cout << " projectionMatrix * point\n";
-    print(test);
-    std::cout << std::endl;
+    
     glPointSize(10);
-    shader->Use();
+   
     //modelMatrix = glm::translate(modelMatrix,glm::vec3(1.5f, 0.0f, -7.0f));
     GPolygon poly;
     GPoint2D pnt1(200.0f, 200.f);
-    GPoint2D pnt2(400.0f, 200.f);
-    GPoint2D pnt3(600.0f, 500.f);
-    GPoint2D pnt4(700.0f, 600.f);
-   /* poly.AddPoint(200.0f, 400.f, .0f);
-    poly.AddPoint(400.0f, 200.f, .0f);
-    poly.AddPoint(600.0f, 500.f, .0f);
-    poly.AddPoint(700.0f, 600.f, .0f);*/
-    scene.Add(gobject_to_ptr(pnt1));
+    GPoint2D pnt2(600.0f, 200.f);
+    GPoint2D pnt3(200.0f, 600.f);
+    GPoint2D pnt4(600.0f, 600.f);
+    GPoint2D pnt5(400.0f, 400.f);
+    /*poly.AddPoint(200.0f, 200.f, .0f);
+    poly.AddPoint(600.0f, 200.f, .0f);
+    poly.AddPoint(200.0f, 600.f, .0f);
+    poly.AddPoint(600.0f, 600.f, .0f);
+    scene.Add(gobject_to_ptr(poly));*/
+    //scene.Add(gobject_to_ptr(pnt1));
     //scene.Add(gobject_to_ptr(pnt2));
     //scene.Add(gobject_to_ptr(pnt3));
     //scene.Add(gobject_to_ptr(pnt4));
+    scene.Add(gobject_to_ptr(pnt5));
+    shader->Use();
+    shader->SetMatrix4("projection", projectionMatrix);
+    glm::vec4 v(200.f, 200.f, 0.f, 1.f);
+    //modelMatrix = glm::translate(modelMatrix,glm::vec3(100.f,0.f,0.f));
+    auto t = projectionMatrix * modelMatrix * v;
+    print(t);
     while (!window.IsShouldClose())
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1,1,0,1);
 
-        shader->SetMatrix4("projection", projectionMatrix);
+       
         shader->SetMatrix4("model", modelMatrix);
         shader->SetMatrix4("view", viewMatrix);
-       
+        
         //DrawAxis();
 
         
         scene.Render();
         window.SwapBuffer();
-
-        //glfwSwapBuffers(window);   
     }
 
     return 0;

@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <map>
+#include "..\Include\Eigen\Dense"
 #include <vector>
 #include <stdexcept>
 #include <Windows.h>
@@ -12,7 +14,6 @@
 #include <chrono>
 #include <fstream>
 #include <sstream>
-#include <map>
 #include <math.h>
 #include <iostream>
 #include <string_view>
