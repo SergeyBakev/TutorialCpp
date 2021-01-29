@@ -741,69 +741,86 @@ void print(glm::vec4& vec)
 //
 //    return{};
 //}
+#include "Mathematic/GMathematic.h"
+using namespace Common::Mathematic;
 
 int main()
 {
-    std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
-    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
-    GWindow2d window(WIDTH, HEIGHT, "Test");
-
-    auto manager = ResourceManager::Instance();
-    ShaderProgramPtr shader = manager->CreateShader("test", vertexShaderFile, fragmentShaderFile);
-    if (shader == nullptr)
-        return -1;
-
-    shader->SetAtribsLocation({ {0,"vertex_pos"s},{1,"vertex_color"s} });
-    scaleMatrix = glm::scale(scaleMatrix, glm::vec3(1.05f, 1.05f, 1.f));
-    glfwSetCursorPosCallback(window.Handle(), cursor_moved);
-    glfwSetMouseButtonCallback(window.Handle(), mouse_callback);
-    glfwSetScrollCallback(window.Handle(), scroled);
-    //projectionMatrix = glm::translate(projectionMatrix,glm::vec(-1.f, 1.f, 1.f);
-    projectionMatrix *= glm::ortho(-(float)WIDTH / 2.f, (float)WIDTH / 2.f, -(float)WIDTH / 2.f, (float)WIDTH / 2.f, -1.f, 1.f);
-    //projectionMatrix = glm::ortho(0.f, (float)WIDTH, 0.f, (float)HEIGHT,0.f,1.f);
+    glm::vec3 A = { 2,3,-1 };
+    glm::vec3 B = { 4,5,-2 };
+    glm::vec3 C = { 3,1,1 };
     
-    
-    glPointSize(10);
-   
-    //modelMatrix = glm::translate(modelMatrix,glm::vec3(1.5f, 0.0f, -7.0f));
-    GPolygon poly;
-    GPoint2D pnt1(200.0f, 200.f);
-    GPoint2D pnt2(600.0f, 200.f);
-    GPoint2D pnt3(200.0f, 600.f);
-    GPoint2D pnt4(600.0f, 600.f);
-    GPoint2D pnt5(400.0f, 400.f);
-    /*poly.AddPoint(200.0f, 200.f, .0f);
-    poly.AddPoint(600.0f, 200.f, .0f);
-    poly.AddPoint(200.0f, 600.f, .0f);
-    poly.AddPoint(600.0f, 600.f, .0f);
-    scene.Add(gobject_to_ptr(poly));*/
-    //scene.Add(gobject_to_ptr(pnt1));
-    //scene.Add(gobject_to_ptr(pnt2));
-    //scene.Add(gobject_to_ptr(pnt3));
-    //scene.Add(gobject_to_ptr(pnt4));
-    scene.Add(gobject_to_ptr(pnt5));
-    shader->Use();
-    shader->SetMatrix4("projection", projectionMatrix);
-    glm::vec4 v(200.f, 200.f, 0.f, 1.f);
-    //modelMatrix = glm::translate(modelMatrix,glm::vec3(100.f,0.f,0.f));
-    auto t = projectionMatrix * modelMatrix * v;
-    print(t);
-    while (!window.IsShouldClose())
-    {
-        glfwPollEvents();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(1,1,0,1);
+    auto AB = MakeVector(A, B);
+    auto AC = MakeVector(A, C);
 
-       
-        shader->SetMatrix4("model", modelMatrix);
-        shader->SetMatrix4("view", viewMatrix);
-        
-        //DrawAxis();
+    float test =  AngleBeetwnVector(AB, AC);
 
-        
-        scene.Render();
-        window.SwapBuffer();
-    }
 
     return 0;
 }
+//int main()
+//{
+//    
+//    std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
+//    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
+//    GWindow2d window(WIDTH, HEIGHT, "Test");
+//
+//    auto manager = ResourceManager::Instance();
+//    ShaderProgramPtr shader = manager->CreateShader("test", vertexShaderFile, fragmentShaderFile);
+//    if (shader == nullptr)
+//        return -1;
+//
+//    shader->SetAtribsLocation({ {0,"vertex_pos"s},{1,"vertex_color"s} });
+//    scaleMatrix = glm::scale(scaleMatrix, glm::vec3(1.05f, 1.05f, 1.f));
+//    glfwSetCursorPosCallback(window.Handle(), cursor_moved);
+//    glfwSetMouseButtonCallback(window.Handle(), mouse_callback);
+//    glfwSetScrollCallback(window.Handle(), scroled);
+//    //projectionMatrix = glm::translate(projectionMatrix,glm::vec(-1.f, 1.f, 1.f);
+//    projectionMatrix *= glm::ortho(-(float)WIDTH / 2.f, (float)WIDTH / 2.f, -(float)WIDTH / 2.f, (float)WIDTH / 2.f, -1.f, 1.f);
+//    //projectionMatrix = glm::ortho(0.f, (float)WIDTH, 0.f, (float)HEIGHT,0.f,1.f);
+//    
+//    
+//    glPointSize(10);
+//   
+//    //modelMatrix = glm::translate(modelMatrix,glm::vec3(1.5f, 0.0f, -7.0f));
+//    GPolygon poly;
+//    GPoint2D pnt1(200.0f, 200.f);
+//    GPoint2D pnt2(600.0f, 200.f);
+//    GPoint2D pnt3(200.0f, 600.f);
+//    GPoint2D pnt4(600.0f, 600.f);
+//    GPoint2D pnt5(400.0f, 400.f);
+//    /*poly.AddPoint(200.0f, 200.f, .0f);
+//    poly.AddPoint(600.0f, 200.f, .0f);
+//    poly.AddPoint(200.0f, 600.f, .0f);
+//    poly.AddPoint(600.0f, 600.f, .0f);
+//    scene.Add(gobject_to_ptr(poly));*/
+//    //scene.Add(gobject_to_ptr(pnt1));
+//    //scene.Add(gobject_to_ptr(pnt2));
+//    //scene.Add(gobject_to_ptr(pnt3));
+//    //scene.Add(gobject_to_ptr(pnt4));
+//    scene.Add(gobject_to_ptr(pnt5));
+//    shader->Use();
+//    shader->SetMatrix4("projection", projectionMatrix);
+//    glm::vec4 v(200.f, 200.f, 0.f, 1.f);
+//    //modelMatrix = glm::translate(modelMatrix,glm::vec3(100.f,0.f,0.f));
+//    auto t = projectionMatrix * modelMatrix * v;
+//    print(t);
+//    while (!window.IsShouldClose())
+//    {
+//        glfwPollEvents();
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        glClearColor(1,1,0,1);
+//
+//       
+//        shader->SetMatrix4("model", modelMatrix);
+//        shader->SetMatrix4("view", viewMatrix);
+//        
+//        //DrawAxis();
+//
+//        
+//        scene.Render();
+//        window.SwapBuffer();
+//    }
+//
+//    return 0;
+//}

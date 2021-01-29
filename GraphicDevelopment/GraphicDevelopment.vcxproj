@@ -153,6 +153,9 @@
   <ItemGroup>
     <ClCompile Include="GL\GCContext.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mathematic\GMathematic.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -162,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GL\GCContext.h" />
+    <ClInclude Include="Mathematic\GMathematic.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Window\GWindow.h" />
     <ClInclude Include="Window\Window2dManager.h" />

@@ -19,7 +19,10 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{e9c32b7b-c3e0-46c6-bf2a-fd4f76de093b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Window">
+    <Filter Include="Mathematic">
+      <UniqueIdentifier>{96c44437-0121-49a2-a41b-493220b12e80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Window">
       <UniqueIdentifier>{82ba578b-a19b-4918-8eb9-698f43883f05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -34,10 +37,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Window\GWindow.cpp">
-      <Filter>Window</Filter>
+      <Filter>Source Files\Window</Filter>
     </ClCompile>
     <ClCompile Include="Window\Window2dManager.cpp">
-      <Filter>Window</Filter>
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Mathematic\GMathematic.cpp">
+      <Filter>Mathematic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -48,10 +54,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Window\GWindow.h">
-      <Filter>Window</Filter>
+      <Filter>Source Files\Window</Filter>
     </ClInclude>
     <ClInclude Include="Window\Window2dManager.h">
-      <Filter>Window</Filter>
+      <Filter>Source Files\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Mathematic\GMathematic.h">
+      <Filter>Mathematic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
