@@ -1,17 +1,39 @@
 #include "stdafx.h"
 #include "GCContext.h"
 
-
-GCContext::GCContext()
-{ /* Initialize the library */
-    if (!glfwInit())
-        throw std::runtime_error("Could not initialize GLFW");
-    if(glewInit() != GLEW_OK)
-        throw std::runtime_error("Could not initialize GLEW");
-}
-
-GCContext::~GCContext()
+namespace Common
 {
-    glfwTerminate();
-    glewExperimental = true;
+	namespace Graphic
+	{
+		GCContext::GCContext()
+		{
+
+		}
+
+		GCContext::~GCContext()
+		{
+
+		}
+
+		void GCContext::Add(GraphicElementPtr el)
+		{
+			elements_.push_back(el);
+		}
+
+		void GCContext::Render()
+		{
+			for (const auto el : elements_)
+				el->Draw();
+		}
+
+		void GCContext::Clear()
+		{
+			elements_.clear();
+		}
+		void GCContext::ForEach(std::function<void(GraphicElementPtr)> action)
+		{
+			for (const auto el : elements_)
+				action(el);
+		}
+	}
 }
