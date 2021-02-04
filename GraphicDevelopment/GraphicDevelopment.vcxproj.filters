@@ -66,6 +66,15 @@
     <ClCompile Include="GL\GPolygon.cpp">
       <Filter>GL</Filter>
     </ClCompile>
+    <ClCompile Include="GL\GIndexArrayObject.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GVertexBufferObject.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GL\GVertexArray.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GL\GCContext.h">
@@ -104,12 +113,27 @@
     <ClInclude Include="GL\GPolygon.h">
       <Filter>GL</Filter>
     </ClInclude>
+    <ClInclude Include="GL\GIndexArrayObject.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GVertexBufferObject.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GL\GVertexArray.h">
+      <Filter>GL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\simple_fragment_shader.glsl">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\simple_vertex_shader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\grid_shader.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\grid_shader.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

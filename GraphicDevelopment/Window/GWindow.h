@@ -21,8 +21,8 @@ public:
 
 	GLFWwindow* Handle() const;
 
-	void ScaleObjects(double xoff, double yoff);
-	void RotateObjects(double angle,double xoff, double yoff);
+	void Scale(double xoff, double yoff);
+	void Rotate(double angle,double xoff, double yoff);
 
 	void RegisterWindow() const;
 
@@ -38,6 +38,7 @@ private:
 	void UpdateProjection(float width, float height);
 
 	void DrawAxis();
+	void DrawGrid();
 
 	void OnDraw();
 
@@ -45,6 +46,7 @@ private:
 	GLFWwindow* window_;
 	Common::Graphic::GCContext context_;
 	Common::Resources::ShaderProgramPtr shader_;
+	
 	double scale_x_ = 1.0;
 	double scale_y_ = 1.0;
 	size_t width_;
@@ -53,4 +55,5 @@ private:
 
 
 	glm::mat4 projectionMatrix_ = glm::identity<glm::mat4>();
+	glm::mat4 viewMatrix_ = glm::identity<glm::mat4>();
 };

@@ -11,14 +11,14 @@ namespace Common
             glGenVertexArrays(1, &vao);
             glBindVertexArray(vao);
 
-            GLuint colors_vbo = 0;
+          /*  GLuint colors_vbo = 0;
             glGenBuffers(1, &colors_vbo);
             glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
             glBufferData(GL_ARRAY_BUFFER, sizeof(color_), &color_, GL_DYNAMIC_DRAW);
 
             glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(1);
+            glEnableVertexAttribArray(1);*/
             shader_->SetMatrix4("model", model_);
             if(!shader_->IsUsed())
                 shader_->Use();

@@ -119,7 +119,7 @@ namespace Common
                 if (!link_status)
                 {
                     isCompiled_ = false;
-                    GLchar log[1024];
+                    GLchar log[1024] = {};
                     GLsizei msg_size = 0;
                     glGetShaderInfoLog(programId, sizeof(log), &msg_size, log);
                     std::string errors;

@@ -9,6 +9,9 @@
 #include "GL/Graphic.h"
 #include "GL/GPolygon.h"
 #include "GL/g_detail.h"
+#include "GL/GVertexBufferObject.h"
+#include "GL/GIndexArrayObject.h"
+#include "GL/Graphic.h"
 
 using namespace Common::Mathematic;
 using namespace Common::Graphic;
@@ -27,101 +30,6 @@ GLfloat colors[] = { 0.0f,0.f,0.f };
 glm::mat4 scaleMatrix = glm::identity<glm::mat4>();
 glm::mat4 modelMatrix = glm::identity<glm::mat4>();
 glm::mat4 viewMatrix = glm::identity<glm::mat4>();
-
-float fovy = 45;
-float scale = 1.1f;
-double cur_x_pos;
-double cur_y_pos;
-bool isMousePresed = false;
-bool isMouse3Presed = false;
-
-#pragma region Window callback
-
-void scroled(GLFWwindow* win, double xoffset, double yoffset)
-{
-    GWindow2d* window = GWindow2dManger::Instanse()->GetWindow(win);
-    auto mat = glm::identity<glm::mat4>(); //glm::translate(viewMatrix, glm::vec3(1.f));
-    if (yoffset == 1)
-    {   
-        window->ScaleObjects(1.05f, 1.05f);
-        //viewMatrix  = glm::scale(viewMatrix, glm::vec3(1.05f, 1.05f, 1.f));
-    }
-    else
-    {
-        window->ScaleObjects(0.95, 0.95);
-        //viewMatrix = glm::scale(viewMatrix, glm::vec3(0.95, 0.95f, 1.f));
-    }
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    if (key == GLFW_KEY_F5 && action == GLFW_PRESS)
-    {
-        GWindow2dManger::Instanse()->GetWindow(window)->ResetTransform();
-        viewMatrix *= glm::inverse(viewMatrix);
-    }
-}
-
-void mouse_callback(GLFWwindow* window, int button, int action, int mods)
-{
-    if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
-    {       
-        isMousePresed = true;
-        glfwGetCursorPos(window, &cur_x_pos, &cur_y_pos);
-        std::cout << "Mouse1 presed\n";
-        //std::cout << cur_x_pos << "\t" << cur_x_pos << std::endl;
-        //scene.Add(std::make_shared<GPoint2D>(v));
-    }
-
-    if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_PRESS)
-    {
-        isMouse3Presed = true;
-    }
-
-    if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_RELEASE)
-    {
-        isMouse3Presed = false;
-    }
-    if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
-    {
-        isMousePresed = false;
-        std::cout << "Mouse1 realesed\n";
-    }
-}
-
-void cursor_moved(GLFWwindow* win, double xpos, double ypos)
-{
-    if (isMousePresed && !isMouse3Presed)
-    {   
-        glm::vec3 v(-xpos / 100, -ypos/100, 0.f);
-        std::cout << xpos << "\t" << ypos << std::endl;
-        double xoffset = (cur_x_pos - xpos) /-30;
-        double yoffset = (cur_y_pos - ypos) /30 ;
-        int z = 3;
-        viewMatrix = glm::translate(viewMatrix, glm::vec3(xoffset, yoffset, 0.f));
-    }
-    if (!isMousePresed && isMouse3Presed)
-    {
-       /* glm::vec3 v(-xpos / 100, -ypos / 100, 0.f);
-        std::cout << xpos << "\t" << ypos << std::endl;
-        double xoffset = (cur_x_pos - xpos) / -30;
-        double yoffset = (cur_y_pos - ypos) / 30;
-        viewMatrix = glm::rotate(viewMatrix,15.f, glm::vec3(0.1, 0.1, 0.f));*/
-        GWindow2d* window = GWindow2dManger::Instanse()->GetWindow(win);
-        window->RotateObjects(15, 0, 0);
-    }
-}
-
-void on_resize(GLFWwindow* window, int width, int height)
-{
-    
-    //projectionMatrix = glm::ortho(0.f, (float)width, (float)height, 0.f, 0.f, 1.f);
-}
-
-#pragma endregion
-
 
 
 void print(glm::mat4& m)
@@ -143,62 +51,147 @@ void print(glm::vec4& vec)
         std::cout << vec[i] << "\t\t";
     }
 }
+void DrawAxis()
+{
+    GLfloat axsisVertex[] =
+    {
+      1,0,0,
+      -1,0,0,
+      0,1,0,
+      0,-1,0
+    };
 
+    GLfloat axsisDiogonalVertex[] =
+    {
+      1,1,0,
+      -1,-1,0,
+      1,-1,0,
+      -1,1,0
+    };
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GVertexBuffer gvertexes;
+    gvertexes.Atach(axsisVertex, sizeof(axsisVertex));
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+    glDrawArrays(GL_LINES, 0, 4);
+
+  /*  gvertexes.Atach(axsisDiogonalVertex, sizeof(axsisDiogonalVertex));
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+    glDrawArrays(GL_LINES, 0, 4);*/
+}
+using namespace glm;
+
+glm::vec3 Rotate(const vec3& vec,float angle)
+{
+    float x = vec[0] * cos(angle) - vec[1] * sin(angle);
+    float y = vec[0] * sin(angle) + vec[1] * cos(angle);
+    float z = 0;
+    return { x,y,z };
+}
+void DrawCircle(float radius, const vec3& axis)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    //viewMatrix = glm::rotate(viewMatrix, glm::radians(1.f), glm::vec3(0, 0, 1));
+    float pntSize = 0;
+    glGetFloatv(GL_POINT_SIZE, &pntSize);
+    glPointSize(1);
+    float angle = 0.0;
+    std::vector<vec3> points;
+    points.push_back({ 0,radius,0 });
+    vec3 start(0, radius, 0);
+    for (; angle < 360;)
+    {
+       
+        angle += 0.001;
+        points.push_back(Rotate(start, angle));
+        /*matrix = rotate(matrix,glm::radians(angle), axis);
+        auto pnt = start * matrix;
+        points.push_back({ pnt.x,pnt.y,pnt.z });*/
+    }
+    GVertexBuffer gvertexes;
+    gvertexes.Atach(points.data(), points.size() * sizeof(GL_FLOAT));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+    glDrawArrays(GL_POINTS, 0, points.size());
+
+}
 int main()
 {
-    
+
     std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
     std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
-  
+
     GWindow2d window(WIDTH, HEIGHT, "Test");
     auto manager = ResourceManager::Instance();
     ShaderProgramPtr shader = manager->CreateShader("test", vertexShaderFile, fragmentShaderFile);
     if (shader == nullptr)
         return -1;
 
-    shader->SetAtribsLocation({ {0,"vertex_pos"s},{1,"vertex_color"s} });
+    shader->SetAtribsLocation({ {0,"vertex_pos"s} });
 
-    window.SetShader(shader);
-    glfwSetKeyCallback(window.Handle(),key_callback);
-    glfwSetCursorPosCallback(window.Handle(), cursor_moved);
-    glfwSetMouseButtonCallback(window.Handle(), mouse_callback);
-    glfwSetScrollCallback(window.Handle(), scroled);
-    glfwSetWindowSizeCallback(window.Handle(), on_resize);
-    
+    /*shader = manager->CreateShader("grid", gridvertexShaderFile, gridFragmentShaderFile);
+    if (shader == nullptr)
+        return -1;*/
+
+    GLfloat vertex[] =
+    {
+      /* 0.0,0.0,0.0,*/
+       0.,0.5,0.0,
+       /*0.0,0.0,0.0,
+       1.0,1.0,0.0*/
+     /* -0.5 /2,0.5/2,0,
+      0.5 /2,0.5 /2,0.,
+      0.5/2,-0.5/2,0,
+      -0.5/2,-0.5/2,0*/
+    };
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GVertexBuffer gvertexes;
+    gvertexes.Atach(vertex, sizeof(vertex));
     glPointSize(10);
-    GPolygon poly(shader);
-    poly.AddPoint(200.0f, 200.f, .0f);
-    poly.AddPoint(600.0f, 200.f, .0f);
-    poly.AddPoint(200.0f, 600.f, .0f);
-    poly.AddPoint(600.0f, 600.f, .0f);
-    //GPoint point(200., 200., shader);
-    //shader->SetMatrix4("projection", projectionMatrix);
-
-
-    window.AddGraphicElement(gobject_to_ptr(poly));
-    glViewport(0, 0, WIDTH, HEIGHT);
-  
+    vec3 point (2, 1, 0);
+    vec3 ax(1, 1, 0);
+    shader->Use();
+    auto viewMatrix = glm::identity<glm::mat4>();
+    auto viewMatrix2 = viewMatrix;
+    shader->SetMatrix4("model", glm::identity<glm::mat4>());
+    shader->SetMatrix4("projection", glm::identity<glm::mat4>());
+    
+    //print(viewMatrix);
     while (!window.IsShouldClose())
     {
         glfwPollEvents();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(1,1,0,1);
-        glColor3f(1.0, 0.f, 0.f);
-        glPushMatrix();
+        glClear(GL_COLOR_BUFFER_BIT);
+        shader->Use();
+        shader->SetMatrix4("view", viewMatrix2);
+        //
+        DrawAxis();
+        gvertexes.Bind();
+        glBindVertexArray(vao);
+        //viewMatrix = glm::translate(viewMatrix,glm::vec3(-0.0001, 0, 0));
+        
+        shader->SetMatrix4("view", viewMatrix);
+        DrawCircle(0.5, { 0,0,1 });
+      /*  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_POINTS, 0, 1);*/
 
-       
-        glBegin(GL_TRIANGLES);
-        glVertex2f(0, 0.5);
-        glVertex2f(0,0);
-        glVertex2f(0.5,0);
-        glRotatef(15, 1, 1, 0);
-        glEnd();
 
-        glPopMatrix();
-        /*shader->SetMatrix4("model", modelMatrix);*/
-        //shader->SetMatrix4("view", viewMatrix);   
-
-        //window.Draw();
+        gvertexes.Unbind();
         window.SwapBuffer();
     }
 

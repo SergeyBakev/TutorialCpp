@@ -155,6 +155,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="GL\GIndexArrayObject.cpp" />
     <ClCompile Include="GL\GPoint.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
@@ -167,6 +168,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="GL\GVertexArray.cpp" />
+    <ClCompile Include="GL\GVertexBufferObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mathematic\GMathematic.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -183,9 +186,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GL\GCContext.h" />
+    <ClInclude Include="GL\GIndexArrayObject.h" />
     <ClInclude Include="GL\GPoint.h" />
     <ClInclude Include="GL\GPolygon.h" />
     <ClInclude Include="GL\Graphic.h" />
+    <ClInclude Include="GL\GVertexArray.h" />
+    <ClInclude Include="GL\GVertexBufferObject.h" />
     <ClInclude Include="GL\g_detail.h" />
     <ClInclude Include="Mathematic\GMathematic.h" />
     <ClInclude Include="Resources\Logger.h" />
@@ -196,6 +202,8 @@
     <ClInclude Include="Window\Window2dManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\grid_shader.fs" />
+    <None Include="Shaders\grid_shader.vs" />
     <None Include="Shaders\simple_fragment_shader.glsl" />
     <None Include="Shaders\simple_vertex_shader.glsl" />
   </ItemGroup>
