@@ -8,7 +8,7 @@ namespace Common
         class GPolygon : public GraphicElementBase
         {
         public:
-            GPolygon(Resources::ShaderProgramPtr& shader) : GraphicElementBase({ 0.0,0.0,0.0 },shader)
+            GPolygon() : GraphicElementBase({ 0.0,0.0,0.0 })
             {
 
             }

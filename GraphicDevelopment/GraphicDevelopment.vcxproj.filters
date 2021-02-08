@@ -75,6 +75,9 @@
     <ClCompile Include="GL\GVertexArray.cpp">
       <Filter>GL</Filter>
     </ClCompile>
+    <ClCompile Include="debug_print.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GL\GCContext.h">

@@ -7,18 +7,18 @@ namespace Common
 	{
         struct Point2D
         {
-            double x_;
-            double y_;
-            double z_ = 0;
+            float x_;
+            float y_;
+            float z_ = 0;
         };
 
         class GPoint : public GraphicElementBase
         {
         public:
 
-            GPoint(double x, double y, Resources::ShaderProgramPtr& shader);
-            GPoint(const glm::vec3& pnt, Resources::ShaderProgramPtr& shader);
-            GPoint(const glm::vec4& pnt, Resources::ShaderProgramPtr& shader);
+            GPoint(double x, double y);
+            GPoint(const glm::vec3& pnt);
+            GPoint(const glm::vec4& pnt);
 
             Point2D GetCord() const { return pnt_; }
 

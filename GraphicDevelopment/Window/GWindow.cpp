@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "GWindow.h"
+#include "..\GL\GVertexBufferObject.h"
+#include "..\GL\GPoint.h"
 #include "..\Resources\ResourceManager.h"
 #include "Window2dManager.h"
 
@@ -7,12 +9,10 @@ using namespace Common::Graphic;
 using namespace Common::Resources;
 
 void print(glm::mat4& m);
+void print(glm::vec3& m);
+void print(glm::vec4& m);
 float fovy = 45;
 float scale = 1.1f;
-double cur_x_pos;
-double cur_y_pos;
-bool isMousePresed = false;
-bool isMouse3Presed = false;
 
 #pragma region Window callback
 
@@ -22,13 +22,12 @@ void scroled(GLFWwindow* win, double xoffset, double yoffset)
 	auto mat = glm::identity<glm::mat4>(); //glm::translate(viewMatrix, glm::vec3(1.f));
 	if (yoffset == 1)
 	{
-		//window->Scale(1.05f, 1.05);
-		//window->ScaleObjects(1.05f, 1.05f);
+		window->Scale(1.05f, 1.05);
 		//viewMatrix  = glm::scale(viewMatrix, glm::vec3(1.05f, 1.05f, 1.f));
 	}
 	else
 	{
-		//window->Scale(0.95, 0.95);
+		window->Scale(0.95, 0.95);
 		//viewMatrix = glm::scale(viewMatrix, glm::vec3(0.95, 0.95f, 1.f));
 	}
 }
@@ -46,52 +45,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
-	{
-		isMousePresed = true;
-		glfwGetCursorPos(window, &cur_x_pos, &cur_y_pos);
-		std::cout << "Mouse1 presed\n";
-		//std::cout << cur_x_pos << "\t" << cur_x_pos << std::endl;
-		//scene.Add(std::make_shared<GPoint2D>(v));
-	}
-
-	if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_PRESS)
-	{
-		isMouse3Presed = true;
-	}
-
-	if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_RELEASE)
-	{
-		isMouse3Presed = false;
-	}
-	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
-	{
-		isMousePresed = false;
-		std::cout << "Mouse1 realesed\n";
-	}
+	auto win = GWindow2dManger::Instanse()->GetWindow(window);
+	win->GetMouseCallBack()(win, button, action, mods);
 }
 
-void cursor_moved(GLFWwindow* win, double xpos, double ypos)
+void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 {
-	if (isMousePresed && !isMouse3Presed)
-	{
-		glm::vec3 v(-xpos / 100, -ypos / 100, 0.f);
-		std::cout << xpos << "\t" << ypos << std::endl;
-		double xoffset = (cur_x_pos - xpos) / -30;
-		double yoffset = (cur_y_pos - ypos) / 30;
-		int z = 3;
-		//viewMatrix = glm::translate(viewMatrix, glm::vec3(xoffset, yoffset, 0.f));
-	}
-	if (!isMousePresed && isMouse3Presed)
-	{
-		/* glm::vec3 v(-xpos / 100, -ypos / 100, 0.f);
-		 std::cout << xpos << "\t" << ypos << std::endl;
-		 double xoffset = (cur_x_pos - xpos) / -30;
-		 double yoffset = (cur_y_pos - ypos) / 30;
-		 viewMatrix = glm::rotate(viewMatrix,15.f, glm::vec3(0.1, 0.1, 0.f));*/
-		GWindow2d* window = GWindow2dManger::Instanse()->GetWindow(win);
-		//window->RotateObjects(15, 0, 0);
-	}
+	auto win = GWindow2dManger::Instanse()->GetWindow(window);
+	win->GetMouseMoveCallBack()(win, xpos, ypos);
+	
 }
 
 void on_resize(GLFWwindow* window, int width, int height)
@@ -113,7 +75,7 @@ GWindow2d::GWindow2d(size_t width, size_t height, std::string_view title) :
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	
 	window_ = glfwCreateWindow(static_cast<int>(width_), static_cast<int>(height_), title_.c_str(), NULL, NULL);
-	//UpdateProjection((float)width_, (float)height_);
+	UpdateProjection((float)width_, (float)height_);
 
 	if (!window_)
 	{
@@ -132,7 +94,8 @@ GWindow2d::GWindow2d(size_t width, size_t height, std::string_view title) :
 	glfwSetMouseButtonCallback(window_, mouse_callback);
 	glfwSetScrollCallback(window_, scroled);
 	glfwSetWindowSizeCallback(window_, on_resize);
-	//glViewport(0, 0, width_, height_);
+	//viewPort_ = { 0, 0, width_, height_ };
+	//glViewport(viewPort_[0], viewPort_[1], viewPort_[2], viewPort_[3]);
 }
 
 bool GWindow2d::IsShouldClose() const
@@ -152,14 +115,29 @@ Common::Graphic::GraphicElementPtr GWindow2d::AddGraphicElement(const Common::Gr
 	return element;
 }
 
-glm::mat4 GWindow2d::GetProjectionMatrix()
+glm::mat4 GWindow2d::GetProjectionMatrix() const
 {
 	return projectionMatrix_;
+}
+
+glm::mat4 GWindow2d::GetModelMatrix() const
+{
+	return model_;
+}
+
+glm::vec4 GWindow2d::GetViewPort() const
+{
+	return viewPort_;
 }
 
 void GWindow2d::SetShader(Common::Resources::ShaderProgramPtr shader)
 {
 	shader_ = shader;
+}
+
+Common::Resources::ShaderProgramPtr GWindow2d::GetSahder()
+{
+	return shader_;
 }
 
 GLFWwindow* GWindow2d::Handle() const
@@ -169,9 +147,10 @@ GLFWwindow* GWindow2d::Handle() const
 
 void GWindow2d::Scale(double xoff, double yoff)
 {
-	viewMatrix_ = glm::scale(viewMatrix_, glm::vec3(xoff, yoff, 0.f));
-
-	projectionMatrix_  = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 0.f));
+	projectionMatrix_ = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 0.f));
+	print(viewMatrix_);
+	//viewMatrix_ = glm::translate(viewMatrix_, { vec2[0],vec2[1],vec[2]});
+	//projectionMatrix_  = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 0.f));
 	/*
 	context_.ForEach([=](GraphicElementPtr obj) 
 		{
@@ -185,6 +164,36 @@ void GWindow2d::Rotate(double angle, double xoff, double yoff)
 	//	{
 	//		obj->Rotate((float)angle,(float)xoff, (float)yoff, 0.f);
 	//	});
+}
+
+void GWindow2d::Move(double xoff, double yoff)
+{
+	viewMatrix_ = glm::translate(viewMatrix_, glm::vec3(xoff, yoff, 0.f));
+}
+
+void GWindow2d::Move(const glm::vec3& vec)
+{
+	Move(vec[0], vec[1]);
+}
+
+void GWindow2d::SetMouseCallBack(MouseCallBack function)
+{
+	mouseCallBack_ = function;
+}
+
+void GWindow2d::SetMouseMoveCallBack(MouseMoveCallBack function)
+{
+	mouseMoveCallBack_ = function;
+}
+
+GWindow2d::MouseCallBack GWindow2d::GetMouseCallBack() const
+{
+	return mouseCallBack_;
+}
+
+GWindow2d::MouseMoveCallBack GWindow2d::GetMouseMoveCallBack() const
+{
+	return mouseMoveCallBack_;
 }
 
 void GWindow2d::RegisterWindow() const
@@ -213,6 +222,16 @@ GWindow2dManger* GWindow2d::Manadger()
 	return GWindow2dManger::Instanse();
 }
 
+float GWindow2d::GetWidth() const
+{
+	return (float)width_;
+}
+
+float GWindow2d::GetHeight() const
+{
+	return (float)height_;
+}
+
 void GWindow2d::UpdateProjection(float width, float height)
 {
 	// projectionMatrix *= glm::ortho(-(float)WIDTH / 2.f, (float)WIDTH / 2.f, -(float)WIDTH / 2.f, (float)WIDTH / 2.f, -1.f, 1.f);
@@ -224,38 +243,32 @@ void GWindow2d::DrawAxis()
 	static GLfloat colors2[] = { 1.0f,0.f,0.f };
 	float width = static_cast<float>(width_);
 	float height = static_cast<float>(height_);
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	GVertexBuffer vertexes;
+	float center_x = width / 2;
+	float center_y = height / 2;
+	float x_vec = center_x + width_ / 10;
+	float y_vec = center_y - height / 10;
 
-	GLuint vertexbuffer;
-	GLuint colors_vbo = 0;
-	GLfloat xAxis[]
+	glPointSize(5);
+	std::vector <Common::Graphic::Point2D> points
 	{
-		0.f,height /2, 0.f,
-		width, height /2 , 0.f,
-		width / 2, 0.f,0.f,
-		width / 2, height,0.f,
+		{center_x,center_y,0.f}, {x_vec,center_y,0},
+		{center_x,center_y,0.f}, {center_x,y_vec,0},
 	};
 
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(xAxis), xAxis, GL_STATIC_DRAW);
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	vertexes.Atach(points.data(), (GLsizei)(points.size() * sizeof(points[0])));
+	glBindVertexArray(vao);
+	vertexes.Bind();
 
-	glGenBuffers(1, &colors_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors2), &colors2, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	glDrawArrays(GL_LINES, 0, (GLsizei)(points.size()));
 
-	glDrawArrays(GL_POLYGON, 0, 4);
+	vertexes.Unbind();
+	glBindVertexArray(0);
+
 }
 
 void GWindow2d::DrawGrid()
@@ -320,12 +333,18 @@ void GWindow2d::DrawGrid()
 
 void GWindow2d::OnDraw()
 {
-	shader_->Use();
-	shader_->SetMatrix4("projection", projectionMatrix_);
-	glm::mat4 model = glm::identity<glm::mat4>();
-	shader_->SetMatrix4("model", model);
-	shader_->SetMatrix4("view", viewMatrix_);
-	//DrawGrid();
-	//context_.Render();
-	shader_->Unuse();
+	if (shader_ != nullptr)
+	{
+		if (!shader_->IsUsed())
+			shader_->Use();
+
+		shader_->SetMatrix4("projection", projectionMatrix_);
+
+		glm::mat4 model = glm::identity<glm::mat4>();
+		shader_->SetMatrix4("view", viewMatrix_);
+		shader_->SetMatrix4("model", model);
+		DrawAxis();
+		//context_.Render();
+		shader_->Unuse();
+	}
 }

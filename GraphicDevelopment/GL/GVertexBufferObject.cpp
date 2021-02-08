@@ -11,6 +11,7 @@ namespace Common
 
 		GVertexBuffer::~GVertexBuffer()
 		{
+			Unbind();
 			if (id_)
 				glDeleteBuffers(1, &id_);
 		}

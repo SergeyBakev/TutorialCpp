@@ -1,10 +1,13 @@
 #include "stdafx.h"
 #include "Graphic.h"
+
 void print(glm::mat4& m);
 namespace Common
 {
 	namespace Graphic
 	{
+        using namespace Common::Resources;
+
 		void GraphicElementBase::Draw()
 		{
             GLuint vao;
@@ -19,9 +22,12 @@ namespace Common
             glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
             glEnableVertexAttribArray(1);*/
-            shader_->SetMatrix4("model", model_);
-            if(!shader_->IsUsed())
-                shader_->Use();
+            if (shader_ != nullptr)
+            {
+                shader_->SetMatrix4("model", model_);
+                if (!shader_->IsUsed())
+                    shader_->Use();
+            }
 
             OnDraw();
             //shader_->Unuse();
@@ -52,6 +58,16 @@ namespace Common
         glm::mat4 GraphicElementBase::GetTransofrm() const
         {
             return model_;
+        }
+
+        void GraphicElementBase::SetActiveShader(const ShaderProgramPtr& shader)
+        {
+            shader_ = shader;
+        }
+
+        ShaderProgramPtr GraphicElementBase::GetActiveShader() const
+        {
+            return shader_;
         }
 
         void GraphicElementBase::MultMatrix(glm::mat4 transform)

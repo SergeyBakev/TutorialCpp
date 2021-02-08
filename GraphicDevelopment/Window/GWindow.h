@@ -7,6 +7,8 @@ class GWindow2dManger;
 class GWindow2d
 {
 public:
+	using MouseCallBack = std::function<void(GWindow2d*, int button, int action, int mods)>;
+	using MouseMoveCallBack = std::function<void(GWindow2d*, double xpos, double ypos)>;
 	GWindow2d() = delete;
 	GWindow2d(size_t width, size_t height, std::string_view title);
 
@@ -15,14 +17,26 @@ public:
 
 	Common::Graphic::GraphicElementPtr AddGraphicElement(const Common::Graphic::GraphicElementPtr& element);
 
-	glm::mat4 GetProjectionMatrix();
+	glm::mat4 GetProjectionMatrix() const;
+	glm::mat4 GetModelMatrix() const;
+	glm::vec4 GetViewPort() const;
 
 	void SetShader(Common::Resources::ShaderProgramPtr shader_);
+	Common::Resources::ShaderProgramPtr GetSahder();
 
 	GLFWwindow* Handle() const;
 
 	void Scale(double xoff, double yoff);
+	
 	void Rotate(double angle,double xoff, double yoff);
+	void Move(double xoff, double yoff);
+	void Move(const glm::vec3& vec);
+
+	void SetMouseCallBack(MouseCallBack function);
+	void SetMouseMoveCallBack(MouseMoveCallBack function);
+
+	MouseCallBack GetMouseCallBack() const;
+	MouseMoveCallBack GetMouseMoveCallBack() const;
 
 	void RegisterWindow() const;
 
@@ -32,7 +46,8 @@ public:
 
 	static GWindow2dManger* Manadger();
 
-
+	float GetWidth() const;
+	float GetHeight() const;
 
 private:
 	void UpdateProjection(float width, float height);
@@ -41,6 +56,10 @@ private:
 	void DrawGrid();
 
 	void OnDraw();
+private: 
+	//CallBack
+	MouseCallBack mouseCallBack_;
+	MouseMoveCallBack mouseMoveCallBack_;
 
 private:
 	GLFWwindow* window_;
@@ -56,4 +75,6 @@ private:
 
 	glm::mat4 projectionMatrix_ = glm::identity<glm::mat4>();
 	glm::mat4 viewMatrix_ = glm::identity<glm::mat4>();
+	glm::mat4 model_ = glm::identity<glm::mat4>();
+	glm::vec4 viewPort_;
 };
