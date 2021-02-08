@@ -94,7 +94,7 @@ GWindow2d::GWindow2d(size_t width, size_t height, std::string_view title) :
 	glfwSetMouseButtonCallback(window_, mouse_callback);
 	glfwSetScrollCallback(window_, scroled);
 	glfwSetWindowSizeCallback(window_, on_resize);
-	//viewPort_ = { 0, 0, width_, height_ };
+	viewPort_ = { 0, 0, width_, height_ };
 	//glViewport(viewPort_[0], viewPort_[1], viewPort_[2], viewPort_[3]);
 }
 
@@ -125,6 +125,11 @@ glm::mat4 GWindow2d::GetModelMatrix() const
 	return model_;
 }
 
+glm::mat4 GWindow2d::GetViewMatrix() const
+{
+	return viewMatrix_;
+}
+
 glm::vec4 GWindow2d::GetViewPort() const
 {
 	return viewPort_;
@@ -147,8 +152,8 @@ GLFWwindow* GWindow2d::Handle() const
 
 void GWindow2d::Scale(double xoff, double yoff)
 {
-	projectionMatrix_ = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 0.f));
-	print(viewMatrix_);
+	viewMatrix_ = glm::scale(viewMatrix_, glm::vec3(xoff, yoff, 0.f));
+	//print(viewMatrix_);
 	//viewMatrix_ = glm::translate(viewMatrix_, { vec2[0],vec2[1],vec[2]});
 	//projectionMatrix_  = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 0.f));
 	/*
@@ -277,58 +282,7 @@ void GWindow2d::DrawGrid()
 
 	size_t dx = 50;
 	size_t dy = 50;
-	std::vector<glm::vec3> points;
-	//points.push_back(glm::vec3(0, 0, 0.f));
-	//points.push_back(glm::vec3(0, 50, 0.f));
-	//points.push_back(glm::vec3(50, 50, 0.f));
-	//points.push_back(glm::vec3(50, 0, 0.f));
 
-	//glClear(GL_COLOR_BUFFER_BIT);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	int xsize = 0, ysize = 0;
-	for (int j = 0; j < 10; j++)
-	{
-
-		xsize = 0;
-		for (int i = 0; i < 10; i++)
-		{
-			points.push_back(glm::vec3(-50.0 + xsize, -50.0 + ysize, 0.0));
-			points.push_back(glm::vec3(-40.0 + xsize, -50.0 + ysize, 0.0));
-			points.push_back(glm::vec3(-40.0 + xsize, -40.0 + ysize, 0.0));
-			points.push_back(glm::vec3(-50.0 + xsize, -40.0 + ysize, 0.0));
-
-			xsize += 10.0;
-		}
-		ysize += 10.0;
-	}
-
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	GLuint vertexbuffer;
-	GLuint colors_vbo = 0;
-
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), points.data(), GL_STATIC_DRAW);
-
-	glGenBuffers(1, &colors_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors2), &colors2, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glLineWidth(1);
-	glDrawArrays(GL_POLYGON, 0, (GLsizei)points.size());
 }
 
 void GWindow2d::OnDraw()
@@ -344,7 +298,7 @@ void GWindow2d::OnDraw()
 		shader_->SetMatrix4("view", viewMatrix_);
 		shader_->SetMatrix4("model", model);
 		DrawAxis();
-		//context_.Render();
+		context_.Render();
 		shader_->Unuse();
 	}
 }

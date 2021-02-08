@@ -25,6 +25,50 @@ using namespace Common::Resources;
 using namespace glm;
 
 
+class GCircle2D : public GraphicElementBase
+{
+public:
+
+    GCircle2D(const glm::vec3& center, float radius) : GraphicElementBase({ 1,1,1 })
+    {
+        center_ = center;
+        radius_ = radius;
+    }
+protected:
+    virtual void OnDraw()
+    {
+        std::vector<glm::vec3> points; /*=
+        {
+            {200,200,0}
+        };*/
+        float angle = 0.0f;
+        float steep = 0.01f;
+        float x = 400 + 15;
+        float y = 400 + 15;
+
+        points.push_back({ 400,400,0 });
+        while (angle < 360)
+        {
+            auto radians = glm::radians(angle);
+            points.push_back({ cos(radians),cos(radians),0 });
+            angle += steep;
+        }
+        glPointSize(10);
+        GVertexBuffer v;
+        v.Atach(points.data(), points.size() * sizeof(glm::vec3));
+        v.Bind();
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_POINTS, 0, (GLsizei)(points.size()));
+
+        v.Unbind();
+    }
+private:
+    glm::vec3 center_;
+    float radius_;
+    
+};
 
 GLfloat colors[] = { 0.0f,0.f,0.f };
 
@@ -54,8 +98,9 @@ void mouse_callback(GWindow2d* window, int button, int action, int mods)
     {
         glfwGetCursorPos(window->Handle(), &x_pos, &y_pos);
         std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_PRESSED:\t" << x_pos << "\t" << y_pos << std::endl;
-       /* auto shape = window->AddGraphicElement(std::make_shared<GPoint>(cur_x_pos, cur_y_pos));
-        shape->SetActiveShader(window->GetSahder());*/
+      
+       
+       
         isMousePresed = true;
     }
 
@@ -83,7 +128,7 @@ void mouse_moved(GWindow2d* window, double xpos, double ypos)
         glfwGetCursorPos(window->Handle(), &x_pos2, &y_pos2);
         double xoff = x_pos2 - x_pos;
         double yoff = y_pos2 - y_pos;
-        window->Move(xoff, yoff);
+        window->Move(xoff / 25, yoff / 25);
 
         std::cout << "GLFW_MOUSE_BUTTON_1 MOVED_PRESED:\t" << x_pos2 << "\t" << y_pos2 << std::endl;
        
@@ -146,10 +191,12 @@ int main()
 
     InitializeOpenGL(shader);
     UpdateShaderMatrix(shader);
+    GCircle2D d({ 0,0,0 }, 0.2);
+    window.AddGraphicElement(gobject_to_ptr(d));
     while (!window.IsShouldClose())
     {
         glClear(GL_COLOR_BUFFER_BIT);
-        glColor3f(1, 1, 1);
+        glClearColor(1, 1, 1,1);
 
         glfwPollEvents();
        

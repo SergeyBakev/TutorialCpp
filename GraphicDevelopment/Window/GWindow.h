@@ -19,6 +19,7 @@ public:
 
 	glm::mat4 GetProjectionMatrix() const;
 	glm::mat4 GetModelMatrix() const;
+	glm::mat4 GetViewMatrix() const;
 	glm::vec4 GetViewPort() const;
 
 	void SetShader(Common::Resources::ShaderProgramPtr shader_);
