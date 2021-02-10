@@ -11,6 +11,8 @@ using namespace Common::Resources;
 void print(glm::mat4& m);
 void print(glm::vec3& m);
 void print(glm::vec4& m);
+
+bool isMouseBnt1Presed = false;
 float fovy = 45;
 float scale = 1.1f;
 
@@ -34,11 +36,13 @@ void scroled(GLFWwindow* win, double xoffset, double yoffset)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+	GWindow2d* win = GWindow2dManger::Instanse()->GetWindow(window);
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	if (key == GLFW_KEY_F5 && action == GLFW_PRESS)
+	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
 	{
-		GWindow2dManger::Instanse()->GetWindow(window)->ResetTransform();
+		win->ResetTransform();
+		//GWindow2dManger::Instanse()->GetWindow(window)->ResetTransform();
 		//viewMatrix *= glm::inverse(viewMatrix);
 	}
 }
@@ -46,13 +50,49 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	auto win = GWindow2dManger::Instanse()->GetWindow(window);
-	win->GetMouseCallBack()(win, button, action, mods);
+	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+	{
+		double x, y;
+		glfwGetCursorPos(window, &x, &y);
+		//std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_PRESSED:\t" << x << "\t" << y << std::endl;
+		isMouseBnt1Presed = true;
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_PRESS)
+	{
+
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_RELEASE)
+	{
+
+	}
+	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
+	{
+
+	    isMouseBnt1Presed = false;
+		//std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_RELEASE:\t" <</* cur_x_pos << "\t" << cur_y_pos << */std::endl;
+	}
+	
 }
 
 void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 {
 	auto win = GWindow2dManger::Instanse()->GetWindow(window);
-	win->GetMouseMoveCallBack()(win, xpos, ypos);
+	double x, y;
+	glfwGetCursorPos(window, &x, &y);
+	glm::vec3 newPos(x,y,0);
+	double newX, newY;
+	
+	//glm::vec3 newPos = win->Unproject(x, y);
+	if (isMouseBnt1Presed)
+	{
+		auto curPos = win->GetCurMousePos();
+		auto translate = newPos - curPos;
+		win->Move(translate);
+	}
+	
+	win->SetMouseCoorditane(newPos);
 	
 }
 
@@ -145,6 +185,21 @@ Common::Resources::ShaderProgramPtr GWindow2d::GetSahder()
 	return shader_;
 }
 
+glm::vec3 GWindow2d::Unproject(const glm::vec3& vec) const
+{
+	return glm::unProject(vec, model_, projectionMatrix_, viewPort_);
+}
+
+glm::vec3 GWindow2d::Unproject(float x, float y, float z) const
+{
+	return Unproject({ x, y, z });
+}
+
+glm::vec3 GWindow2d::Unproject(float x, float y) const
+{
+	return Unproject(x, y, 0);
+}
+
 GLFWwindow* GWindow2d::Handle() const
 {
 	return window_;
@@ -201,20 +256,29 @@ GWindow2d::MouseMoveCallBack GWindow2d::GetMouseMoveCallBack() const
 	return mouseMoveCallBack_;
 }
 
+glm::vec3 GWindow2d::GetCurMousePos() const
+{
+	return curMousePos_;
+}
+
+glm::vec3 GWindow2d::SetMouseCoorditane(double x, double y)
+{
+	return SetMouseCoorditane({ x,y,0 });
+}
+
+glm::vec3 GWindow2d::SetMouseCoorditane(const glm::vec3& vec)
+{
+	curMousePos_ = vec;
+	return curMousePos_;
+}
+
 void GWindow2d::RegisterWindow() const
 {
 }
 
 void GWindow2d::ResetTransform()
 {
-	context_.ForEach([=](GraphicElementPtr obj)
-		{
-			auto model = obj->GetTransofrm();
-			model[2][2] = 1;		
-			model = glm::inverse(model);
-			model[2][2] = 0;
-			obj->MultMatrix(model);
-		});
+	viewMatrix_ = glm::identity<glm::mat4>();
 }
 
 void GWindow2d::Draw()

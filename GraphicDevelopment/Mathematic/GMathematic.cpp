@@ -37,6 +37,17 @@ namespace Common
 			return v;
 		}
 
+		float DistanseTo(const glm::vec3& v1, const glm::vec3& v2)
+		{
+				return std::sqrtf(
+				std::abs(v2[0] - v1[0]) * std::abs(v2[0] - v1[0])  
+				+
+				std::abs(v2[1] - v1[1])* std::abs(v2[1] - v1[1])
+				+
+				std::abs(v2[2] - v1[2])* std::abs(v2[2] - v1[2])
+				);
+		}
+
 		
 	}
 }

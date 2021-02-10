@@ -24,6 +24,60 @@ using namespace std::chrono_literals;
 using namespace Common::Resources;
 using namespace glm;
 
+namespace Common
+{
+    namespace GeometryPrimitive
+    {
+        static const glm::vec3 xy_plane = glm::vec3(1, 1, 0);
+        static const glm::vec3 yz_plane = glm::vec3(0, 1, 1);
+        static const glm::vec3 zx_plane = glm::vec3(1, 0, 1);
+
+        class Circle
+        {
+        public:
+            Circle(const glm::vec3& center, const glm::vec3& plane, float radius) :         
+                center_(center), plane_(plane), radius_(radius)
+            {
+
+            }
+
+            Circle(const glm::vec3& center, float radius) : Circle(center,xy_plane,radius)
+            {
+
+            }
+
+            Circle(float center_x, float center_y, float center_z,
+                   float x_plane, float y_plane, float z_plane,
+                   float radius) : Circle({center_x,center_y,center_z},{x_plane,y_plane,z_plane}, radius)
+            {
+
+            }
+
+            Circle(float center_x, float center_y,
+                float x_plane, float y_plane,
+                float radius) : Circle({ center_x,center_y,0 }, { x_plane,y_plane,0 }, radius)
+            {
+
+            }
+
+
+        private:
+            float radius_;
+            glm::vec3 plane_;
+            glm::vec3 center_;
+            
+        };
+
+        class Arc : public Circle
+        {
+            
+        };
+    }
+}
+
+using namespace Common::GeometryPrimitive;
+
+
 
 class GCircle2D : public GraphicElementBase
 {
@@ -37,23 +91,24 @@ public:
 protected:
     virtual void OnDraw()
     {
+        glPointSize(2);
         std::vector<glm::vec3> points; /*=
         {
             {200,200,0}
         };*/
         float angle = 0.0f;
         float steep = 0.01f;
-        float x = 400 + 15;
-        float y = 400 + 15;
+        float x = center_[0];
+        float y = center_[1];
 
-        points.push_back({ 400,400,0 });
+        points.push_back(center_);
         while (angle < 360)
         {
             auto radians = glm::radians(angle);
-            points.push_back({ cos(radians),cos(radians),0 });
+            points.push_back({ x + radius_ * cos(radians), y + radius_ * sin(radians),0 });
             angle += steep;
         }
-        glPointSize(10);
+
         GVertexBuffer v;
         v.Atach(points.data(), points.size() * sizeof(glm::vec3));
         v.Bind();
@@ -90,62 +145,6 @@ double y_pos2;
 bool isMousePresed = false;
 bool isMouse3Presed = false;
 
-#pragma region Window callback
-
-void mouse_callback(GWindow2d* window, int button, int action, int mods)
-{
-    if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
-    {
-        glfwGetCursorPos(window->Handle(), &x_pos, &y_pos);
-        std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_PRESSED:\t" << x_pos << "\t" << y_pos << std::endl;
-      
-       
-       
-        isMousePresed = true;
-    }
-
-    if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_PRESS)
-    {
-
-    }
-
-    if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_RELEASE)
-    {
-
-    }
-    if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
-    {
-      
-        isMousePresed = false;
-        std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_RELEASE:\t" <</* cur_x_pos << "\t" << cur_y_pos << */std::endl;
-    }
-}
-
-void mouse_moved(GWindow2d* window, double xpos, double ypos)
-{
-    if (isMousePresed && !isMouse3Presed)
-    {
-        glfwGetCursorPos(window->Handle(), &x_pos2, &y_pos2);
-        double xoff = x_pos2 - x_pos;
-        double yoff = y_pos2 - y_pos;
-        window->Move(xoff / 25, yoff / 25);
-
-        std::cout << "GLFW_MOUSE_BUTTON_1 MOVED_PRESED:\t" << x_pos2 << "\t" << y_pos2 << std::endl;
-       
-        /*v  = v * window->GetProjectionMatrix();
-        print(v);
-        window->Move(glm::vec3(v[0], v[1], v[2]));
-    */
-      
-    }
-
-    if (!isMousePresed && isMouse3Presed)
-    {
-        
-    }
-}
-
-#pragma endregion
 
 void UpdateShaderMatrix(const ShaderProgramPtr& shader)
 {
@@ -176,8 +175,6 @@ int main()
     shader->SetAtribsLocation({ {0,"vertex_pos"s} });
     
     window.SetShader(shader);
-    window.SetMouseCallBack(mouse_callback);
-    window.SetMouseMoveCallBack(mouse_moved);
    /* GLfloat vertex[] =
     {
        0.0,0.5,0.0,
@@ -191,7 +188,10 @@ int main()
 
     InitializeOpenGL(shader);
     UpdateShaderMatrix(shader);
-    GCircle2D d({ 0,0,0 }, 0.2);
+    glm::vec3 center(500, 500, 0);
+    glm::vec3 to(400, 400 + HEIGHT / 10, 0);
+    float r =DistanseTo(center, to);
+    GCircle2D d(center, r);
     window.AddGraphicElement(gobject_to_ptr(d));
     while (!window.IsShouldClose())
     {

@@ -25,6 +25,9 @@ public:
 	void SetShader(Common::Resources::ShaderProgramPtr shader_);
 	Common::Resources::ShaderProgramPtr GetSahder();
 
+	glm::vec3 Unproject(const glm::vec3& vec) const;
+	glm::vec3 Unproject(float x, float y, float z) const;
+	glm::vec3 Unproject(float x, float y) const;
 	GLFWwindow* Handle() const;
 
 	void Scale(double xoff, double yoff);
@@ -39,6 +42,10 @@ public:
 	MouseCallBack GetMouseCallBack() const;
 	MouseMoveCallBack GetMouseMoveCallBack() const;
 
+
+	glm::vec3 GetCurMousePos() const;
+	glm::vec3 SetMouseCoorditane(double x, double y);
+	glm::vec3 SetMouseCoorditane(const glm::vec3& vec);
 	void RegisterWindow() const;
 
 	void ResetTransform();
@@ -73,7 +80,7 @@ private:
 	size_t height_;
 	std::string title_;
 
-
+	glm::vec3 curMousePos_;
 	glm::mat4 projectionMatrix_ = glm::identity<glm::mat4>();
 	glm::mat4 viewMatrix_ = glm::identity<glm::mat4>();
 	glm::mat4 model_ = glm::identity<glm::mat4>();

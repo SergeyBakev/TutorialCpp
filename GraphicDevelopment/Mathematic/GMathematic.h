@@ -39,5 +39,7 @@ namespace Common
 		//
 		//    return{};
 		//}
+
+		float DistanseTo(const glm::vec3& v1, const glm::vec3& v2);
 	}
 }
