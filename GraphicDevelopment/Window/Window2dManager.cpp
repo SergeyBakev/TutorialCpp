@@ -19,7 +19,22 @@ bool GWindow2dManger::Register(GWindow2d* window, GLFWwindow* handle)
 	return true;
 }
 
+bool GWindow2dManger::RegisterByName(std::string name, GWindow2d* window)
+{
+	const auto& it = name_to_window.find(name);
+	if (it != std::end(name_to_window))
+		return false;
+
+	name_to_window.insert({ name,window });
+	return true;
+}
+
 GWindow2d* GWindow2dManger::GetWindow(GLFWwindow* handle) const
 {
 	return handle_to_window.at(handle);
+}
+
+GWindow2d* GWindow2dManger::GetWindowByName(std::string str) const
+{
+	return name_to_window.at(str);
 }

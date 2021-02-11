@@ -152,7 +152,6 @@
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="kdtree.cpp" />
     <ClCompile Include="Test.cpp" />
-    <ClCompile Include="Test2.cpp" />
     <ClCompile Include="TutorialCpp.cpp" />
   </ItemGroup>
   <ItemGroup>

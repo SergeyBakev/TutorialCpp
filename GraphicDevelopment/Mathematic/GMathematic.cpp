@@ -37,15 +37,11 @@ namespace Common
 			return v;
 		}
 
-		float DistanseTo(const glm::vec3& v1, const glm::vec3& v2)
+		glm::vec3 RotateZ(const glm::vec3 vec, float angle, float radius)
 		{
-				return std::sqrtf(
-				std::abs(v2[0] - v1[0]) * std::abs(v2[0] - v1[0])  
-				+
-				std::abs(v2[1] - v1[1])* std::abs(v2[1] - v1[1])
-				+
-				std::abs(v2[2] - v1[2])* std::abs(v2[2] - v1[2])
-				);
+			float dx = (radius * cos(angle));
+			float dy = (radius * sin(angle));
+			return glm::vec3{ dx,dy, 1};
 		}
 
 		

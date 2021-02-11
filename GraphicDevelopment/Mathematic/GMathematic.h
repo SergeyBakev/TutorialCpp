@@ -11,6 +11,7 @@ namespace Common
 
 		glm::vec3 MakeVector(const glm::vec3& start, const glm::vec3& end);
 
+		glm::vec3 RotateZ(const glm::vec3 vec, float angleInRadians, float radius);
 
 		//glm::vec3 ChangeBasis(const glm::vec3& v, const glm::vec3& e1, const glm::vec3& e2, const glm::vec3& e3)
 		//{   
