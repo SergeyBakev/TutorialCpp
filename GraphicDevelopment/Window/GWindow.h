@@ -32,9 +32,11 @@ public:
 
 	void Scale(double xoff, double yoff);
 	
-	void Rotate(double angle,double xoff, double yoff);
+	void Rotate(double xoff,double yoff, double zoff);
+	void Rotate(const glm::vec3& vec);
 	void Move(double xoff, double yoff);
 	void Move(const glm::vec3& vec);
+	
 
 	void SetMouseCallBack(MouseCallBack function);
 	void SetMouseMoveCallBack(MouseMoveCallBack function);
@@ -56,7 +58,8 @@ public:
 
 	float GetWidth() const;
 	float GetHeight() const;
-
+protected:
+	virtual bool OnRotate(const glm::vec3& p, const glm::vec3& v);
 private:
 	void UpdateProjection(float width, float height);
 

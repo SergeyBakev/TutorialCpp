@@ -13,6 +13,7 @@ void print(glm::vec3& m);
 void print(glm::vec4& m);
 
 bool isMouseBnt1Presed = false;
+bool isMouseBnt3Presed = false;
 float fovy = 45;
 float scale = 1.1f;
 
@@ -60,12 +61,12 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
 
 	if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_PRESS)
 	{
-
+		isMouseBnt3Presed = true;
 	}
 
 	if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_RELEASE)
 	{
-
+		isMouseBnt3Presed = false;
 	}
 	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
 	{
@@ -85,11 +86,17 @@ void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 	double newX, newY;
 	
 	//glm::vec3 newPos = win->Unproject(x, y);
-	if (isMouseBnt1Presed)
+	if (isMouseBnt1Presed && !isMouseBnt3Presed)
 	{
 		auto curPos = win->GetCurMousePos();
 		auto translate = newPos - curPos;
 		win->Move(translate);
+	}
+
+	if (isMouseBnt3Presed && !isMouseBnt1Presed)
+	{
+		auto curPos = win->GetCurMousePos();
+		win->Rotate(curPos);
 	}
 	
 	win->SetMouseCoorditane(newPos);
@@ -187,7 +194,20 @@ Common::Resources::ShaderProgramPtr GWindow2d::GetSahder()
 
 glm::vec3 GWindow2d::Unproject(const glm::vec3& vec) const
 {
-	return glm::unProject(vec, model_, projectionMatrix_, viewPort_);
+	GLdouble model[] = { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
+	GLdouble proj[16] = { 0 };
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			proj[i * 4 + j] = projectionMatrix_[i][j];
+
+	double nx, ny, nz;
+	int vp[] = { 0,0,800,800 };
+	float y = viewPort_[3] - vec[1];
+	float z;
+	glReadPixels(vec[0], y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+	gluUnProject(vec[0], y, z, model, proj, vp, &nx, &ny, &nz);
+	auto vec3 =  glm::unProject(vec, model_ * viewMatrix_ , projectionMatrix_, viewPort_);
+	return {};
 }
 
 glm::vec3 GWindow2d::Unproject(float x, float y, float z) const
@@ -218,12 +238,16 @@ void GWindow2d::Scale(double xoff, double yoff)
 		});*/
 }
 
-void GWindow2d::Rotate(double angle, double xoff, double yoff)
+void GWindow2d::Rotate(double xoff, double yoff, double zoff)
 {
-	//context_.ForEach([=](GraphicElementPtr obj)
-	//	{
-	//		obj->Rotate((float)angle,(float)xoff, (float)yoff, 0.f);
-	//	});
+	Rotate({ xoff,yoff,zoff });
+}
+
+void GWindow2d::Rotate(const glm::vec3& vec)
+{
+	auto vec1 = Unproject(vec);
+	auto vec2 = Unproject(GetCurMousePos());
+	OnRotate(vec1, vec2);
 }
 
 void GWindow2d::Move(double xoff, double yoff)
@@ -299,6 +323,15 @@ float GWindow2d::GetWidth() const
 float GWindow2d::GetHeight() const
 {
 	return (float)height_;
+}
+
+bool GWindow2d::OnRotate(const glm::vec3& p, const glm::vec3& v)
+{
+
+
+
+
+	return true;
 }
 
 void GWindow2d::UpdateProjection(float width, float height)

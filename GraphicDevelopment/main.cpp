@@ -162,6 +162,7 @@ void InitializeOpenGL(const ShaderProgramPtr& shader)
 
 int main()
 {
+    
     std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
     std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
 
@@ -195,7 +196,7 @@ int main()
     window.AddGraphicElement(gobject_to_ptr(d));
     while (!window.IsShouldClose())
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
         glClearColor(1, 1, 1,1);
 
         glfwPollEvents();
