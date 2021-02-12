@@ -1,63 +1,77 @@
 #include <iostream>
 #include "kdtree.h"
 #include <vector>
+#include <thread>
+#include <chrono>
+#include <future>
+#include <functional>
 
-double sum()
+using namespace std::placeholders;
+using namespace std::chrono_literals;
+
+
+
+void watch_dog(bool stop)
 {
-    std::cout << "Sum\n";
-    return 0;
-}
-
-double fake_sum()
-{
-    std::cout << "Sum\n";
-    return 0;
-}
-
-//using FPtr = decltype(&Foo::sum);
-
-typedef double(*f)(void);
-
-//struct Trigger
-//{
-//    FPtr f1_;
-//    FPtr f2_;
-//} trigger{ &Foo::sum,&Foo::fake_sum };
-
-struct Trigger2
-{
-    using Type1 = f;
-    using Type2 = f;
-    Type1 f1_;
-    Type2 f2_;
-};
-
-struct test
-{
-    __int64 t = 1;
-    __int64 t2 = 2;
-    __int64 t3 = 3;
-};
-template<typename T, typename R>
-void* void_cast(R(T::* f)())
-{
-    union
+    std::chrono::duration<double> delta = 3.5s;
+    while (!stop)
     {
-        R(T::* pf)();
-        void* p;
-    };
-    pf = f;
-    return p;
+        
+        auto start_sleep = std::chrono::system_clock::now();
+        std::this_thread::sleep_for(3s);
+        auto end_sleep = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end_sleep - start_sleep;
+        if (elapsed_seconds > delta)
+            std::cout << "Program in debug!!!\n";
+    }
+    
+
 }
-constexpr Trigger2 trigger2{ sum,fake_sum };
+
+class WatchDog
+{
+public:
+
+    void Run()
+    {
+        _thread = std::thread(&WatchDog::Loop,this);
+    }
+
+    void Stop()
+    {
+        _stoped = true;
+    }
+
+private:
+    void Loop()
+    {
+        std::chrono::duration<double> delta = 3.5s;
+        while (!_stoped)
+        {
+
+            auto start_sleep = std::chrono::system_clock::now();
+            std::this_thread::sleep_for(3s);
+            auto end_sleep = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end_sleep - start_sleep;
+            if (elapsed_seconds > delta)
+                std::cout << "Program in debug!!!\n";
+        }
+    }
+
+private:
+    bool _stoped = false;
+    std::thread _thread;
+};
+
+double func(double a,double b)
+{
+    return a + b;
+}
 int main()
 {
-    ((f)&trigger2)();
-    
-  
-
-
-
-    return 0;
+    auto f = std::bind(func, 2, _1);
+    double tes  = f(5,3);
+   
+    return -1;
 }
 

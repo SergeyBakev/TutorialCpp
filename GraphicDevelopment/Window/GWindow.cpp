@@ -132,6 +132,7 @@ GWindow2d::GWindow2d(size_t width, size_t height, std::string_view title) :
 		throw std::runtime_error("Could not initialize GLEW");
 
 	Manadger()->Register(this, window_);
+	Manadger()->RegisterByName(title.data(),this);
 
 	glfwSetKeyCallback(window_, key_callback);
 	glfwSetCursorPosCallback(window_, cursor_moved);
