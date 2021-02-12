@@ -8,3 +8,4 @@
 #include "GMathematic.h"
 #include "ResourceManager.h"
 #include "ShaderProgram.h"
+#include "GBoundingBox.h"
