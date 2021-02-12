@@ -5,12 +5,10 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace GUnitTests
 {
-	TEST_CLASS(GUnitTests)
+	TEST_CLASS(GBoundingBoxTest)
 	{
 	public:
 		
-		TEST_METHOD(TestMethod1)
-		{
-		}
+		
 	};
 }

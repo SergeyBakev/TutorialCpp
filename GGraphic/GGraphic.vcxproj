@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GBoundingBox.h" />
     <ClInclude Include="GCContext.h" />
     <ClInclude Include="GIndexArrayObject.h" />
     <ClInclude Include="GMathematic.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="ShaderProgram.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GBoundingBox.cpp" />
     <ClCompile Include="GCContext.cpp" />
     <ClCompile Include="GIndexArrayObject.cpp" />
     <ClCompile Include="GMathematic.cpp" />

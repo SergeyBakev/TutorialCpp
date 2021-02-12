@@ -42,6 +42,14 @@ namespace Common
 			return glm::vec3{ dx,dy, 1};
 		}
 
+		float DistanseTo(const glm::vec3& v1, const glm::vec3& v2)
+		{
+			return std::sqrt(
+				(v2[0] - v1[0] * v2[0] - v1[0]) +
+				(v2[1] - v2[1] * v2[1] - v2[1]) +
+				(v2[2] - v2[2] * v2[2] - v2[2]));
+		}
+
 		
 	}
 }
