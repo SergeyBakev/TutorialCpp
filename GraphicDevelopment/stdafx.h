@@ -18,3 +18,4 @@
 #include <iostream>
 #include <string_view>
 #include <array>
+#include "..\GGraphic\Include.h"

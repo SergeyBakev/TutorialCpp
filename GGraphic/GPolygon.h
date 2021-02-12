@@ -1,6 +1,6 @@
 #pragma once
 #include "Graphic.h"
-#include "..\Resources\ShaderProgram.h"
+#include "ShaderProgram.h"
 namespace Common
 {
 	namespace Graphic

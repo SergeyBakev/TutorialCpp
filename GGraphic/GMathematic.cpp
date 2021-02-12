@@ -1,7 +1,5 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "GMathematic.h"
-#include <algorithm>
-#include <functional>
 namespace Common
 {
 	namespace Mathematic

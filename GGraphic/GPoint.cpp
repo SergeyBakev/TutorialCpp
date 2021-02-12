@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "GPoint.h"
 #include "GVertexBufferObject.h"
 namespace Common

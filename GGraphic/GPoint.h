@@ -1,6 +1,6 @@
 #pragma once
 #include "Graphic.h"
-#include "..\Resources\ResourceManager.h"
+#include "ResourceManager.h"
 namespace Common
 {
 	namespace Graphic

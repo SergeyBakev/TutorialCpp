@@ -1,6 +1,4 @@
 #pragma once
-#include "..\GL\GCContext.h"
-#include "..\Resources\ShaderProgram.h"
 struct GLFWwindow;
 class GWindow2dManger;
 

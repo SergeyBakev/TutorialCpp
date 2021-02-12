@@ -1,5 +1,5 @@
 #pragma once
-#include "..\Resources\ShaderProgram.h"
+#include "ShaderProgram.h"
 
 namespace Common
 {

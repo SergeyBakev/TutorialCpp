@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "ResourceManager.h"
 
 namespace Common

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "Graphic.h"
 
 void print(glm::mat4& m);

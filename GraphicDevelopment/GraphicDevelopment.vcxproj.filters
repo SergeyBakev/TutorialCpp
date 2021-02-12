@@ -13,28 +13,16 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="GL">
-      <UniqueIdentifier>{6e73d198-8fe5-443f-847e-9a97beae80ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{e9c32b7b-c3e0-46c6-bf2a-fd4f76de093b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Mathematic">
-      <UniqueIdentifier>{96c44437-0121-49a2-a41b-493220b12e80}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resources">
-      <UniqueIdentifier>{5d0e5b29-f02d-4a20-b066-5c2ec9b4408b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Window">
       <UniqueIdentifier>{82ba578b-a19b-4918-8eb9-698f43883f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{3b29ce5a-3db8-4b84-97a8-e90bcf3791a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GL\GCContext.cpp">
-      <Filter>GL</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
@@ -45,44 +33,11 @@
     <ClCompile Include="Window\Window2dManager.cpp">
       <Filter>Window</Filter>
     </ClCompile>
-    <ClCompile Include="Mathematic\GMathematic.cpp">
-      <Filter>Mathematic</Filter>
-    </ClCompile>
-    <ClCompile Include="Resources\ResourceManager.cpp">
-      <Filter>Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="Resources\ShaderProgram.cpp">
-      <Filter>Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="Resources\Logger.cpp">
-      <Filter>Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="GL\Graphic.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
-    <ClCompile Include="GL\GPoint.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
-    <ClCompile Include="GL\GPolygon.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
-    <ClCompile Include="GL\GIndexArrayObject.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
-    <ClCompile Include="GL\GVertexBufferObject.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
-    <ClCompile Include="GL\GVertexArray.cpp">
-      <Filter>GL</Filter>
-    </ClCompile>
     <ClCompile Include="debug_print.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GL\GCContext.h">
-      <Filter>GL</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -92,51 +47,18 @@
     <ClInclude Include="Window\Window2dManager.h">
       <Filter>Window</Filter>
     </ClInclude>
-    <ClInclude Include="Mathematic\GMathematic.h">
-      <Filter>Mathematic</Filter>
-    </ClInclude>
-    <ClInclude Include="Resources\ResourceManager.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Resources\ShaderProgram.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Resources\Logger.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\Graphic.h">
-      <Filter>GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\GPoint.h">
-      <Filter>GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\g_detail.h">
-      <Filter>GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\GPolygon.h">
-      <Filter>GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\GIndexArrayObject.h">
-      <Filter>GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\GVertexBufferObject.h">
-      <Filter>GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GL\GVertexArray.h">
-      <Filter>GL</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\simple_fragment_shader.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\simple_vertex_shader.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\grid_shader.fs">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\grid_shader.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\simple_fragment_shader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\simple_vertex_shader.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

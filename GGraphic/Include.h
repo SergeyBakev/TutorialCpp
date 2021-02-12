@@ -1,0 +1,10 @@
+#pragma once
+#include "GIndexArrayObject.h"
+#include "GVertexBufferObject.h"
+#include "Graphic.h"
+#include "GPoint.h"
+#include "GPolygon.h"
+#include "GCContext.h"
+#include "GMathematic.h"
+#include "ResourceManager.h"
+#include "ShaderProgram.h"

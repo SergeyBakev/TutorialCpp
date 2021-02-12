@@ -1,8 +1,5 @@
 #include "stdafx.h"
-#include "GWindow.h"
-#include "..\GL\GVertexBufferObject.h"
-#include "..\GL\GPoint.h"
-#include "..\Resources\ResourceManager.h"
+#include "..\Window\GWindow.h"
 #include "Window2dManager.h"
 
 using namespace Common::Graphic;
@@ -338,6 +335,7 @@ void GWindow2d::UpdateProjection(float width, float height)
 {
 	// projectionMatrix *= glm::ortho(-(float)WIDTH / 2.f, (float)WIDTH / 2.f, -(float)WIDTH / 2.f, (float)WIDTH / 2.f, -1.f, 1.f);
 	projectionMatrix_ = glm::ortho(0.f, width, height, 0.f, 0.f, 1.f);
+	//projectionMatrix_ = glm::inverse(projectionMatrix_);
 }
 
 void GWindow2d::DrawAxis()
@@ -394,7 +392,7 @@ void GWindow2d::OnDraw()
 		glm::mat4 model = glm::identity<glm::mat4>();
 		shader_->SetMatrix4("view", viewMatrix_);
 		shader_->SetMatrix4("model", model);
-		DrawAxis();
+		//DrawAxis();
 		context_.Render();
 		shader_->Unuse();
 	}

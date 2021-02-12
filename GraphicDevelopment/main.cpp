@@ -1,24 +1,13 @@
 #include "stdafx.h"
-#include "GL/GCContext.h"
 #include "Window/GWindow.h"
 #include "Window/Window2dManager.h"
-#include "Resources/ResourceManager.h"
-#include "Resources/ShaderProgram.h"
-#include "Mathematic/GMathematic.h"
-#include "GL/GPoint.h"
-#include "GL/Graphic.h"
-#include "GL/GPolygon.h"
-#include "GL/g_detail.h"
-#include "GL/GVertexBufferObject.h"
-#include "GL/GIndexArrayObject.h"
-#include "GL/Graphic.h"
+
 
 float HEIGHT = 800.f;
 float WIDTH = 800.f;
 
 using namespace Common::Mathematic;
 using namespace Common::Graphic;
-using namespace Common::Graphic::detail;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 using namespace Common::Resources;
@@ -184,7 +173,16 @@ int main()
     glGenVertexArrays(1, &vao);
      GVertexBuffer gvertexes;
     gvertexes.Atach(vertex, sizeof(vertex));*/
-
+    projectionMatrix = glm::ortho(0.f, (float)WIDTH, (float)HEIGHT, 0.f, 0.f, 1.f);
+    glm::vec4 center2(400, 400, 0, 1);
+    auto vec2 = projectionMatrix * center2;
+    print(vec2);
+    std::cout << std::endl;
+ 
+    projectionMatrix = glm::inverse(projectionMatrix);
+    glm::vec4 center3(0.5, 0.5, 0, 1);
+    vec2 = projectionMatrix * center3;
+    print(vec2);
     glPointSize(10);
 
     InitializeOpenGL(shader);
@@ -192,13 +190,19 @@ int main()
     glm::vec3 center(500, 500, 0);
     glm::vec3 to(400, 400 + HEIGHT / 10, 0);
     float r =DistanseTo(center, to);
-    GCircle2D d(center, r);
-    window.AddGraphicElement(gobject_to_ptr(d));
+   /* GCircle2D d(center, r);
+    window.AddGraphicElement(gobject_to_ptr(d))*/;
+    GPoint pnt(400, 400);
+    //window.AddGraphicElement(gobject_to_ptr(pnt)) ;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
+    glMatrixMode(GL_MODELVIEW);
     while (!window.IsShouldClose())
     {
         glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
         glClearColor(1, 1, 1,1);
-
         glfwPollEvents();
        
       
@@ -210,7 +214,7 @@ int main()
         glDrawArrays(GL_POINTS, 0, 1);
         glBindVertexArray(0);
         gvertexes.Unbind();*/
-        window.Draw();
+       // window.Draw();
         window.SwapBuffer();
     }
 
