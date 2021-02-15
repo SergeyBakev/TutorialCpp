@@ -27,24 +27,24 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window\GWindow.cpp">
-      <Filter>Window</Filter>
-    </ClCompile>
-    <ClCompile Include="Window\Window2dManager.cpp">
-      <Filter>Window</Filter>
-    </ClCompile>
     <ClCompile Include="debug_print.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GWindow.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Window2dManager.cpp">
+      <Filter>Window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window\GWindow.h">
+    <ClInclude Include="GWindow.h">
       <Filter>Window</Filter>
     </ClInclude>
-    <ClInclude Include="Window\Window2dManager.h">
+    <ClInclude Include="Window2dManager.h">
       <Filter>Window</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,6 +59,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\simple_vertex_shader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\circle_vshader.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

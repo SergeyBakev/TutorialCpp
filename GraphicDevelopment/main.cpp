@@ -1,6 +1,5 @@
 #include "stdafx.h"
-#include "Window/GWindow.h"
-#include "Window/Window2dManager.h"
+#include "GWindow.h"
 
 
 float HEIGHT = 800.f;
@@ -11,6 +10,7 @@ using namespace Common::Graphic;
 using namespace std::string_literals;
 using namespace std::chrono_literals;
 using namespace Common::Resources;
+using namespace Common;
 using namespace glm;
 
 namespace Common
@@ -49,8 +49,16 @@ namespace Common
 
             }
 
+            float Radius() const { return radius_; }
+            glm::vec3 Center() const { return center_; }
+            glm::vec3 Plane() const { return plane_; }
 
-        private:
+            float Circumference() const { return fabs(2 * glm::pi<float>() * radius_); }
+
+        protected:
+            Circle() = default;
+
+        protected:
             float radius_;
             glm::vec3 plane_;
             glm::vec3 center_;
@@ -59,7 +67,110 @@ namespace Common
 
         class Arc : public Circle
         {
-            
+        public:
+
+            Arc(const Circle& circle)
+            {
+                radius_ = circle.Radius();
+                plane_ = circle.Plane();
+                center_ = circle.Center();
+                angleMin_ = 0;
+                angleMax_ = 2 * glm::pi<float>();
+            }
+
+            Arc(const glm::vec3& center, const glm::vec3& plane, float radius, float angMin, float angMax) : Circle(center, plane,radius)
+            {
+                angleMin_ = angMin;
+                angleMax_ = angMax;
+            }
+
+            Arc(const glm::vec3& center, float radius, float angMin, float angMax) : Circle(center, xy_plane, radius)
+            {
+                angleMin_ = angMin;
+                angleMax_ = angMax;
+            }
+
+            glm::vec3 PointAt(float p) const
+            {
+                return center_ +  Common::Mathematic::RotateZ(p, radius_);
+            }    
+
+            glm::vec3 Begin() const
+            {
+                return PointAt(angleMax_);
+            }
+
+            glm::vec3 Mid() const
+            {
+                return PointAt(0.5f * (angleMin_ + angleMax_));
+            }
+
+            glm::vec3 End() const
+            {
+                return PointAt(angleMin_);
+            }
+            float AngleMin() const { return angleMin_; };
+            float AngleMax() const { return angleMax_; };
+        private:
+            float angleMin_;
+            float angleMax_;
+        };
+    }
+
+    namespace Graphic
+    {
+        class GCircle : public GraphicElementBase
+        {
+        public:
+            DECLARE_G_OBJ(GCircle, GraphicElementBase)
+
+            GCircle(const Common::GeometryPrimitive::Circle& circle) : arc_(circle)
+            {
+
+            }
+
+            GCircle(const Common::GeometryPrimitive::Circle& circle, const Resources::ShaderProgramPtr& circleShader) : arc_(circle), selfShader_(circleShader)
+            {
+
+            }
+
+            GCircle(const GeometryPrimitive::Arc& arc) : arc_(arc)
+            {
+
+            }
+
+        protected:
+
+            virtual void OnDraw() override
+            {
+                base::OnDraw();
+                glEnable(GL_LINE_SMOOTH);
+                if (selfShader_ == nullptr)
+                {
+                    float count = 360.f;
+                    float angmin = arc_.AngleMin();
+                    float angmax = arc_.AngleMax();
+                    glm3Vectors points;
+                    for (int i = 0; i < count; i++)
+                    {
+                        float t = float(i / (count - 1.0));
+                        float tt = float((1.0f - t) * angmin + float(t * angmax));
+                        points.push_back(arc_.PointAt(tt));
+                    }
+                    
+                    Common::utils::draw_array(points, GL_LINE_STRIP);
+                  
+                }
+                else
+                {
+
+                }
+                glDisable(GL_LINE_SMOOTH);
+            }
+
+        private:
+            Common::GeometryPrimitive::Arc arc_;
+            Resources::ShaderProgramPtr selfShader_;
         };
     }
 }
@@ -71,26 +182,34 @@ using namespace Common::GeometryPrimitive;
 class GCircle2D : public GraphicElementBase
 {
 public:
-
-    GCircle2D(const glm::vec3& center, float radius) : GraphicElementBase({ 1,1,1 })
+    DECLARE_G_OBJ(GCircle2D, GraphicElementBase)
+    GCircle2D(const glm::vec3& center, float radius)
     {
         center_ = center;
         radius_ = radius;
     }
 protected:
+
+    virtual GBoundingBox OnGetBBox() const override
+    {
+        GBoundingBox bbx(center_ - radius_, center_ + radius_);
+        return bbx;
+    }
+
     virtual void OnDraw()
     {
         glPointSize(2);
-        std::vector<glm::vec3> points; /*=
+        std::vector<glm::vec3> points; 
+        /*=
         {
             {200,200,0}
         };*/
         float angle = 0.0f;
-        float steep = 0.01f;
+        float steep = 0.3f;
         float x = center_[0];
         float y = center_[1];
 
-        points.push_back(center_);
+        //points.push_back(center_);
         while (angle < 360)
         {
             auto radians = glm::radians(angle);
@@ -99,13 +218,13 @@ protected:
         }
 
         GVertexBuffer v;
-        v.Atach(points.data(), points.size() * sizeof(glm::vec3));
+        v.Atach(points.data(), (GLsizei)(points.size() * sizeof(glm::vec3)));
         v.Bind();
-
+        glEnable(GL_LINE_SMOOTH);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(0);
-        glDrawArrays(GL_POINTS, 0, (GLsizei)(points.size()));
-
+        glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)(points.size()));
+        glDisable(GL_LINE_SMOOTH);
         v.Unbind();
     }
 private:
@@ -114,44 +233,14 @@ private:
     
 };
 
-GLfloat colors[] = { 0.0f,0.f,0.f };
 
 
 void print(glm::mat4& m);
 void print(glm::vec4& vec);
 void print(glm::vec3& vec);
 
-
-glm::mat4 scaleMatrix = glm::identity<glm::mat4>();
-glm::mat4 modelMatrix = glm::identity<glm::mat4>();
-glm::mat4 viewMatrix = glm::identity<glm::mat4>();
-glm::mat4 projectionMatrix = glm::identity<glm::mat4>();
-
-double x_pos;
-double y_pos;
-double x_pos2;
-double y_pos2;
-bool isMousePresed = false;
-bool isMouse3Presed = false;
-
-
-void UpdateShaderMatrix(const ShaderProgramPtr& shader)
-{
-    shader->SetMatrix4("model", modelMatrix);
-    shader->SetMatrix4("view", viewMatrix);
-
-}
-
-void InitializeOpenGL(const ShaderProgramPtr& shader)
-{
-    //glViewport(0, 0, (GLsizei)WIDTH, (GLsizei)HEIGHT);
-    //projectionMatrix = ortho(0.f, WIDTH, HEIGHT, 0.f, 0.f, 1.f);
-    shader->SetMatrix4("projection", projectionMatrix);
-}
-
 int main()
 {
-    
     std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
     std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
 
@@ -160,45 +249,50 @@ int main()
     ShaderProgramPtr shader = manager->CreateShader("test", vertexShaderFile, fragmentShaderFile);
     if (shader == nullptr)
         return -1;
-
-    
     shader->SetAtribsLocation({ {0,"vertex_pos"s} });
-    
     window.SetShader(shader);
-   /* GLfloat vertex[] =
-    {
-       0.0,0.5,0.0,
-    };
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-     GVertexBuffer gvertexes;
-    gvertexes.Atach(vertex, sizeof(vertex));*/
-    projectionMatrix = glm::ortho(0.f, (float)WIDTH, (float)HEIGHT, 0.f, 0.f, 1.f);
-    glm::vec4 center2(400, 400, 0, 1);
-    auto vec2 = projectionMatrix * center2;
-    print(vec2);
-    std::cout << std::endl;
- 
-    projectionMatrix = glm::inverse(projectionMatrix);
-    glm::vec4 center3(0.5, 0.5, 0, 1);
-    vec2 = projectionMatrix * center3;
-    print(vec2);
-    glPointSize(10);
-
-    InitializeOpenGL(shader);
-    UpdateShaderMatrix(shader);
     glm::vec3 center(500, 500, 0);
     glm::vec3 to(400, 400 + HEIGHT / 10, 0);
     float r =DistanseTo(center, to);
-   /* GCircle2D d(center, r);
-    window.AddGraphicElement(gobject_to_ptr(d))*/;
-    GPoint pnt(400, 400);
-    //window.AddGraphicElement(gobject_to_ptr(pnt)) ;
+  /*  Circle c1(vec3(0.5, 0.5, 0.5), 0.4f);
+    Circle c2(vec3(-0.5, -0.5, 0.5), 0.4f);
+    Circle c3(vec3(0.5, -0.5, 0.5), 0.4f);
+    Circle c4(vec3(-0.5, 0.5, 0.5), 0.4f);*/
+    GeometryPrimitive::Arc arc(vec3(0.5, 0.5, 0), 0.4f, 0.f, pi<float>());
+    window.AddGraphicElement(G_MAKE(GCircle)(arc));
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
     
-    glMatrixMode(GL_MODELVIEW);
+    auto b = arc.Begin();
+    auto e = arc.End();
+
+    window.AddGraphicElement(G_MAKE(GPoint)(b))->SetSize(10.f);
+    window.AddGraphicElement(G_MAKE(GPoint)(e))->SetSize(10.f);
+  
+   /* window.AddGraphicElement(G_MAKE(GCircle)(c1));
+    window.AddGraphicElement(G_MAKE(GCircle)(c2));
+    window.AddGraphicElement(G_MAKE(GCircle)(c3));
+    window.AddGraphicElement(G_MAKE(GCircle)(c4));*/
+    window.ZoomAll();
+   /* G_PTR(GCircle2D) crcl = GCircle2D::MakeGCircle2DPtr(vec3(0,0,0), 0.2f);
+    G_PTR(GCircle2D) crcl1 = GCircle2D::MakeGCircle2DPtr(vec3(0.5,0.5,0), 0.2f);
+
+    glm3Vectors pnts;
+    glm3Vectors pnts2;
+    crcl->GetBBox().GetCorners(pnts);
+    crcl1->GetBBox().GetCorners(pnts2);
+    window.AddGraphicElement(crcl);
+    window.AddGraphicElement(crcl1);
+    */
+   /* for (auto& pnt : pnts)
+    {
+        window.AddGraphicElement(GPoint::MakeGPointPtr(pnt));
+    }
+    
+    for (auto& pnt : pnts2)
+    {
+        window.AddGraphicElement(GPoint::MakeGPointPtr(pnt));
+    }*/
+    //window.ZoomAll();
     while (!window.IsShouldClose())
     {
         glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
@@ -214,7 +308,7 @@ int main()
         glDrawArrays(GL_POINTS, 0, 1);
         glBindVertexArray(0);
         gvertexes.Unbind();*/
-       // window.Draw();
+        window.Draw();
         window.SwapBuffer();
     }
 

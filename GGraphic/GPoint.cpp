@@ -7,19 +7,19 @@ namespace Common
 	{
 		using namespace Common::Resources;
 
-		GPoint::GPoint(double x, double y) : GraphicElementBase({ 1.0,0.0,0.0 })
+		GPoint::GPoint(double x, double y) 
 		{
-			pnt_.x_ = x;
-			pnt_.y_ = y;
+			pnt_.x_ = (float)x;
+			pnt_.y_ = (float)y;
 		}
 
-		GPoint::GPoint(const glm::vec3& pnt) : GraphicElementBase({ 1.0,0.0,0.0 })
+		GPoint::GPoint(const glm::vec3& pnt) 
 		{
 			pnt_.x_ = pnt[0];
 			pnt_.y_ = pnt[1];
 		}
 
-		GPoint::GPoint(const glm::vec4& pnt) : GraphicElementBase({ 1.0,0.0,0.0 })
+		GPoint::GPoint(const glm::vec4& pnt) 
 		{
 			pnt_.x_ = pnt.x;
 			pnt_.y_ = pnt.y;
@@ -37,10 +37,36 @@ namespace Common
 			vertex.Atach(&pnt_, sizeof(pnt_));
 			vertex.Bind();
 
+			glPointSize(GetSize());
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(0);
-			glPointSize(10);
+			
 			glDrawArrays(GL_POINTS, 0, 1);
+		}
+
+		GPointPtr MakeGPoint(double x, double y)
+		{
+			return std::make_shared<GPoint>(x, y);
+		}
+
+		GPointPtr MakeGPoint(float x, float y)
+		{
+			return std::make_shared<GPoint>((double)x, (double)y);
+		}
+
+		GPointPtr MakeGPoint(double x, double y, double z)
+		{
+			return std::make_shared<GPoint>(x, y);
+		}
+
+		GPointPtr MakeGPoint(float x, float y, float z)
+		{
+			return std::make_shared<GPoint>((double)x, (double)y);
+		}
+
+		GPointPtr MakeGPoint(const glm::vec3& v)
+		{
+			return std::make_shared<GPoint>((double)v.x, (double)v.y);
 		}
 
 	}

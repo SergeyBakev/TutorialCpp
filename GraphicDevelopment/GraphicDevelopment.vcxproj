@@ -152,20 +152,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="debug_print.cpp" />
+    <ClCompile Include="GWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Window\GWindow.cpp" />
-    <ClCompile Include="Window\Window2dManager.cpp" />
+    <ClCompile Include="Window2dManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GWindow.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Window\GWindow.h" />
-    <ClInclude Include="Window\Window2dManager.h" />
+    <ClInclude Include="Window2dManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\circle_vshader.vs" />
     <None Include="Shaders\grid_shader.fs" />
     <None Include="Shaders\grid_shader.vs" />
     <None Include="Shaders\simple_fragment_shader.glsl" />

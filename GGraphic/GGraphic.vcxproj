@@ -159,9 +159,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="def_gl_object.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GBoundingBox.h" />
     <ClInclude Include="GCContext.h" />
+    <ClInclude Include="ge_utils.h" />
+    <ClInclude Include="ge_validation.h" />
     <ClInclude Include="GIndexArrayObject.h" />
     <ClInclude Include="GMathematic.h" />
     <ClInclude Include="GPoint.h" />
@@ -174,10 +177,13 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="usings.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GBoundingBox.cpp" />
     <ClCompile Include="GCContext.cpp" />
+    <ClCompile Include="ge_utils.cpp" />
+    <ClCompile Include="ge_validation.cpp" />
     <ClCompile Include="GIndexArrayObject.cpp" />
     <ClCompile Include="GMathematic.cpp" />
     <ClCompile Include="GPoint.cpp" />

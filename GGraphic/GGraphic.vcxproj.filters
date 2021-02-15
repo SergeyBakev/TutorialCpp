@@ -69,6 +69,18 @@
     <ClInclude Include="GBoundingBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="def_gl_object.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="usings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ge_validation.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="ge_utils.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -109,6 +121,12 @@
     </ClCompile>
     <ClCompile Include="GBoundingBox.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ge_validation.cpp">
+      <Filter>Detail</Filter>
+    </ClCompile>
+    <ClCompile Include="ge_utils.cpp">
+      <Filter>Detail</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

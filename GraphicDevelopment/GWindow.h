@@ -26,7 +26,15 @@ public:
 	glm::vec3 Unproject(const glm::vec3& vec) const;
 	glm::vec3 Unproject(float x, float y, float z) const;
 	glm::vec3 Unproject(float x, float y) const;
+
+	glm::vec3 Project(const glm::vec3& vec) const;
+	glm::vec3 Project(float x, float y, float z) const;
+	glm::vec3 Project(float x, float y) const;
+
+
 	GLFWwindow* Handle() const;
+
+	void MainLoop();
 
 	void Scale(double xoff, double yoff);
 	
@@ -44,6 +52,7 @@ public:
 
 
 	glm::vec3 GetCurMousePos() const;
+	glm::vec3 GetUnprojCurMousePos() const;
 	glm::vec3 SetMouseCoorditane(double x, double y);
 	glm::vec3 SetMouseCoorditane(const glm::vec3& vec);
 	void RegisterWindow() const;
@@ -56,8 +65,19 @@ public:
 
 	float GetWidth() const;
 	float GetHeight() const;
+	Common::GBoundingBox GetBbox() const;
+
+	void ZoomAll();
+	void ZoomIn(const Common::GBoundingBox& bbox);
+	void SetSpaceSize(float size);
+	float GetSpaceSize() const;
+
+	void Update();
 protected:
+	
 	virtual bool OnRotate(const glm::vec3& p, const glm::vec3& v);
+
+	virtual bool OnUpdateSizeSpace();
 private:
 	void UpdateProjection(float width, float height);
 
@@ -75,6 +95,7 @@ private:
 	Common::Graphic::GCContext context_;
 	Common::Resources::ShaderProgramPtr shader_;
 	
+	float spaceSize_ = 1;
 	double scale_x_ = 1.0;
 	double scale_y_ = 1.0;
 	size_t width_;

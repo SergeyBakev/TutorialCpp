@@ -1,8 +1,9 @@
 #include "stdafx.h"
-#include "..\Window\GWindow.h"
+#include "GWindow.h"
 #include "Window2dManager.h"
 
 using namespace Common::Graphic;
+using namespace Common;
 using namespace Common::Resources;
 
 void print(glm::mat4& m);
@@ -37,7 +38,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	GWindow2d* win = GWindow2dManger::Instanse()->GetWindow(window);
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+	if (key == GLFW_KEY_HOME && action == GLFW_PRESS)
 	{
 		win->ResetTransform();
 		//GWindow2dManger::Instanse()->GetWindow(window)->ResetTransform();
@@ -80,14 +81,16 @@ void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
 	glm::vec3 newPos(x,y,0);
-	double newX, newY;
 	
 	//glm::vec3 newPos = win->Unproject(x, y);
 	if (isMouseBnt1Presed && !isMouseBnt3Presed)
 	{
-		auto curPos = win->GetCurMousePos();
-		auto translate = newPos - curPos;
-		win->Move(translate);
+		auto curPos = win->GetUnprojCurMousePos();
+		auto translate = win->Unproject(newPos) - curPos;
+		if (!Common::detial::IsValid(translate))
+			return;
+		win->Move(translate[0],-translate[1]);
+
 	}
 
 	if (isMouseBnt3Presed && !isMouseBnt1Presed)
@@ -119,7 +122,7 @@ GWindow2d::GWindow2d(size_t width, size_t height, std::string_view title) :
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	
 	window_ = glfwCreateWindow(static_cast<int>(width_), static_cast<int>(height_), title_.c_str(), NULL, NULL);
-	UpdateProjection((float)width_, (float)height_);
+	//UpdateProjection((float)width_, (float)height_);
 
 	if (!window_)
 	{
@@ -157,6 +160,7 @@ void GWindow2d::SwapBuffer()
 Common::Graphic::GraphicElementPtr GWindow2d::AddGraphicElement(const Common::Graphic::GraphicElementPtr& element)
 {
 	context_.Add(element);
+	Update();
 	return element;
 }
 
@@ -192,20 +196,7 @@ Common::Resources::ShaderProgramPtr GWindow2d::GetSahder()
 
 glm::vec3 GWindow2d::Unproject(const glm::vec3& vec) const
 {
-	GLdouble model[] = { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
-	GLdouble proj[16] = { 0 };
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			proj[i * 4 + j] = projectionMatrix_[i][j];
-
-	double nx, ny, nz;
-	int vp[] = { 0,0,800,800 };
-	float y = viewPort_[3] - vec[1];
-	float z;
-	glReadPixels(vec[0], y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
-	gluUnProject(vec[0], y, z, model, proj, vp, &nx, &ny, &nz);
-	auto vec3 =  glm::unProject(vec, model_ * viewMatrix_ , projectionMatrix_, viewPort_);
-	return {};
+	return glm::unProject(vec, model_, projectionMatrix_, viewPort_);
 }
 
 glm::vec3 GWindow2d::Unproject(float x, float y, float z) const
@@ -218,14 +209,34 @@ glm::vec3 GWindow2d::Unproject(float x, float y) const
 	return Unproject(x, y, 0);
 }
 
+glm::vec3 GWindow2d::Project(const glm::vec3& vec) const
+{
+	return glm::project(vec, model_, projectionMatrix_, viewPort_);
+}
+
+glm::vec3 GWindow2d::Project(float x, float y, float z) const
+{
+	return Project({ x,y,z });
+}
+
+glm::vec3 GWindow2d::Project(float x, float y) const
+{
+	return Project({ x,y,0 });
+}
+
 GLFWwindow* GWindow2d::Handle() const
 {
 	return window_;
 }
 
+void GWindow2d::MainLoop()
+{
+
+}
+
 void GWindow2d::Scale(double xoff, double yoff)
 {
-	viewMatrix_ = glm::scale(viewMatrix_, glm::vec3(xoff, yoff, 0.f));
+	projectionMatrix_ = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 1.f));
 	//print(viewMatrix_);
 	//viewMatrix_ = glm::translate(viewMatrix_, { vec2[0],vec2[1],vec[2]});
 	//projectionMatrix_  = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 0.f));
@@ -283,6 +294,11 @@ glm::vec3 GWindow2d::GetCurMousePos() const
 	return curMousePos_;
 }
 
+glm::vec3 GWindow2d::GetUnprojCurMousePos() const
+{
+	return Unproject(GetCurMousePos());
+}
+
 glm::vec3 GWindow2d::SetMouseCoorditane(double x, double y)
 {
 	return SetMouseCoorditane({ x,y,0 });
@@ -300,6 +316,7 @@ void GWindow2d::RegisterWindow() const
 
 void GWindow2d::ResetTransform()
 {
+	Update();
 	viewMatrix_ = glm::identity<glm::mat4>();
 }
 
@@ -323,19 +340,117 @@ float GWindow2d::GetHeight() const
 	return (float)height_;
 }
 
+GBoundingBox GWindow2d::GetBbox() const
+{
+	GBoundingBox bbox;
+	bbox.Set(Unproject({ viewPort_[0], viewPort_[1], 0 }), true);
+	bbox.Set(Unproject({ viewPort_[0] + viewPort_[2] , (viewPort_[1] + viewPort_[3]), 0 }), true);
+	return bbox;
+}
+
+void GWindow2d::ZoomAll()
+{
+
+	OnUpdateSizeSpace();
+
+	GBoundingBox bbox;
+
+	int i;
+	glm3Vectors corners;
+	auto bbx = context_.GetBBox();
+	context_.GetBBox().GetCorners(corners);
+
+	for (i = 0; i < corners.size(); i++)
+	{
+		glm::vec3& pnt = corners[i];
+		bbox.Set(Project(pnt), true);
+	}
+
+	ZoomIn(bbox);
+
+	bbox = GBoundingBox();
+
+	for (i = 0; i < corners.size(); i++)
+	{
+		glm::vec3& pnt = corners[i];
+		bbox.Set(Project(pnt), true);
+	}
+
+	ZoomIn(bbox);
+
+}
+
+void GWindow2d::ZoomIn(const Common::GBoundingBox& bbox)
+{
+	if (!bbox.IsValid())
+		return;
+
+	
+	float XRatio = 1.0;
+	float YRatio = 1.0;
+	auto diagonal = bbox.Diagonal();
+	XRatio = (viewPort_[2]) / diagonal.x;
+	XRatio = (viewPort_[3]) / diagonal.y;
+
+	auto dim = GetBbox();
+
+	glm::vec3 x = bbox.Center();
+	glm::vec3 c0 = dim.Center();
+	glm::vec3 c1 = Unproject(x);
+	glm::vec3 drag = c0 - c1;
+	Move(drag);
+
+	float scale = XRatio < YRatio ? XRatio : YRatio;
+	Scale(scale, scale);
+}
+
+void GWindow2d::SetSpaceSize(float size)
+{
+	spaceSize_ = size;
+	OnUpdateSizeSpace();
+}
+
+float GWindow2d::GetSpaceSize() const
+{
+	return spaceSize_;
+}
+
+void GWindow2d::Update()
+{
+	auto bbox = context_.GetBBox();
+	SetSpaceSize((float)bbox.MaximumDistanceTo({ 0,0,0 }));
+}
+
 bool GWindow2d::OnRotate(const glm::vec3& p, const glm::vec3& v)
 {
 
+	return true;
+}
 
+bool GWindow2d::OnUpdateSizeSpace()
+{
+	float cx = viewPort_[2] + viewPort_[0];
+	float cy = viewPort_[3] + viewPort_[1];
 
+	float rw, rh, rz;
+	rz = rw = rh = GetSpaceSize();
+
+	float fAspect = cx / cy;
+	if (cx > cy)
+		rw *= fAspect;
+	else
+		rh /= fAspect;
+
+	UpdateProjection(rw, rh);
 
 	return true;
 }
 
 void GWindow2d::UpdateProjection(float width, float height)
 {
+	projectionMatrix_ = glm::ortho(-width, width, -height, height);
 	// projectionMatrix *= glm::ortho(-(float)WIDTH / 2.f, (float)WIDTH / 2.f, -(float)WIDTH / 2.f, (float)WIDTH / 2.f, -1.f, 1.f);
-	projectionMatrix_ = glm::ortho(0.f, width, height, 0.f, 0.f, 1.f);
+	//projectionMatrix_ = glm::ortho(0.f, width, height, 0.f, 0.f, 1.f);
 	//projectionMatrix_ = glm::inverse(projectionMatrix_);
 }
 

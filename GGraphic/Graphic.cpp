@@ -28,7 +28,7 @@ namespace Common
                 if (!shader_->IsUsed())
                     shader_->Use();
             }
-
+            
             OnDraw();
             //shader_->Unuse();
 
@@ -60,6 +60,11 @@ namespace Common
             return model_;
         }
 
+        GBoundingBox GraphicElementBase::GetBBox() const
+        {
+            return OnGetBBox();
+        }
+
         void GraphicElementBase::SetActiveShader(const ShaderProgramPtr& shader)
         {
             shader_ = shader;
@@ -80,10 +85,29 @@ namespace Common
             model_ *= glm::scale(glm::vec3(x, y, z));
         }
 
+        void GraphicElementBase::OnTranslate(float x, float y, float z)
+        {
+            model_ = glm::translate(model_, { x,y,z });
+        }
+
         void GraphicElementBase::OnRotate(float angle, float x, float y, float z)
         {
             model_ *= glm::rotate(0.5f, glm::vec3(1, 0, 0));
             print(model_);
+        }
+
+        void GraphicElementBase::SetColor(float r, float g, float b)
+        {
+            color_ = { r,g,b };
+        }
+
+        void GraphicElementBase::SetSize(float size)
+        {
+            size_ = size;
+        }
+        float GraphicElementBase::GetSize() const
+        {
+            return size_;
         }
 	}
 }

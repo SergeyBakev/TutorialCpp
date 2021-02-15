@@ -1,5 +1,6 @@
 #pragma once
 #include "Graphic.h"
+#include "GBoundingBox.h"
 
 namespace Common
 {
@@ -14,6 +15,7 @@ namespace Common
 			void Add(GraphicElementPtr el);
 			void Render();
 			void Clear();
+			GBoundingBox GetBBox() const;
 
 			void ForEach(std::function<void(GraphicElementPtr)> action);
 

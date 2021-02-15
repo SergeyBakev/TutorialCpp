@@ -8,7 +8,7 @@ namespace Common
         class GPolygon : public GraphicElementBase
         {
         public:
-            GPolygon() : GraphicElementBase({ 0.0,0.0,0.0 })
+            GPolygon() 
             {
 
             }

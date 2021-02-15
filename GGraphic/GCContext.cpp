@@ -30,6 +30,17 @@ namespace Common
 		{
 			elements_.clear();
 		}
+		GBoundingBox GCContext::GetBBox() const
+		{
+			GBoundingBox bbox;
+			for (const auto& el : elements_)
+			{
+				GBoundingBox bb = el->GetBBox();
+					if(bb.IsValid())
+						bbox.Union(bb);
+			}
+			return bbox;
+		}
 		void GCContext::ForEach(std::function<void(GraphicElementPtr)> action)
 		{
 			for (const auto el : elements_)

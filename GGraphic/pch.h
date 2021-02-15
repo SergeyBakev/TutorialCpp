@@ -9,6 +9,7 @@
 
 // add headers that you want to pre-compile here
 #include "framework.h"
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <Gl/GLU.h>
 #include <GLFW/glfw3.h>
@@ -30,4 +31,6 @@
 #include <array>
 #include <algorithm>
 #include <functional>
+
+using glm3Vectors = std::vector<glm::vec3>;
 #endif //PCH_H
