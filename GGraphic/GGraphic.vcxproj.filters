@@ -22,6 +22,9 @@
     <Filter Include="Detail">
       <UniqueIdentifier>{31b1e07e-9e3f-4183-9a19-3aeba5046cf0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GeometryBase">
+      <UniqueIdentifier>{12a12d83-767f-47b9-bee8-564950f5c3d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -66,9 +69,6 @@
     <ClInclude Include="GMathematic.h">
       <Filter>Detail</Filter>
     </ClInclude>
-    <ClInclude Include="GBoundingBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="def_gl_object.h">
       <Filter>Detail</Filter>
     </ClInclude>
@@ -80,6 +80,12 @@
     </ClInclude>
     <ClInclude Include="ge_utils.h">
       <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="GBoundingBox.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="ge_vec.h">
+      <Filter>GeometryBase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -119,14 +125,17 @@
     <ClCompile Include="GMathematic.cpp">
       <Filter>Detail</Filter>
     </ClCompile>
-    <ClCompile Include="GBoundingBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ge_validation.cpp">
       <Filter>Detail</Filter>
     </ClCompile>
     <ClCompile Include="ge_utils.cpp">
       <Filter>Detail</Filter>
+    </ClCompile>
+    <ClCompile Include="GBoundingBox.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="ge_vec.cpp">
+      <Filter>GeometryBase</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

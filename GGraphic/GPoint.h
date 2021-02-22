@@ -24,6 +24,7 @@ namespace Common
             Point2D GetCord() const { return pnt_; }
 
         protected:
+            virtual GBoundingBox OnGetBBox() const override;
             virtual void OnDraw() override;
 
 

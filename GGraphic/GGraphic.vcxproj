@@ -165,6 +165,7 @@
     <ClInclude Include="GCContext.h" />
     <ClInclude Include="ge_utils.h" />
     <ClInclude Include="ge_validation.h" />
+    <ClInclude Include="ge_vec.h" />
     <ClInclude Include="GIndexArrayObject.h" />
     <ClInclude Include="GMathematic.h" />
     <ClInclude Include="GPoint.h" />
@@ -184,6 +185,7 @@
     <ClCompile Include="GCContext.cpp" />
     <ClCompile Include="ge_utils.cpp" />
     <ClCompile Include="ge_validation.cpp" />
+    <ClCompile Include="ge_vec.cpp" />
     <ClCompile Include="GIndexArrayObject.cpp" />
     <ClCompile Include="GMathematic.cpp" />
     <ClCompile Include="GPoint.cpp" />

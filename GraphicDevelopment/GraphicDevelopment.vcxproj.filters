@@ -64,5 +64,8 @@
     <None Include="Shaders\circle_vshader.vs">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\simple_vertex_shader_not_matrix.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

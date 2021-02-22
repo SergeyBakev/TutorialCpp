@@ -7,6 +7,11 @@ namespace Common
     {
     }
 
+    GBoundingBox::GBoundingBox(const Point& pnt)
+    {
+        Set(pnt);
+    }
+
     GBoundingBox::Point GBoundingBox::Min() const
     {
         return min_;
@@ -50,6 +55,7 @@ namespace Common
         }
         return true;
     }
+
 
 
     bool GBoundingBox::GetCorners(glm3Vectors& corners) const
@@ -114,6 +120,163 @@ namespace Common
         V.z = ((P.z < 0.5 * (Min().x + Max().z)) ? Max().z : Min().z) - P.z;
 
         return glm::length(V);
+    }
+
+    bool GBoundingBox::GetPointListBoundingBox(int dim, int is_rat, int count, int stride, const float* points, GBoundingBox& tight_bbox, int bGrowBox, const glm::mat4* xform)
+    {
+        // bounding box workhorse
+        bool rc = false;
+        if (bGrowBox && !tight_bbox.IsValid())
+        {
+            bGrowBox = false;
+        }
+        if (!bGrowBox)
+        {
+            tight_bbox = GBoundingBox();
+        }
+        if (is_rat)
+        {
+            is_rat = 1;
+        }
+
+        if (count > 0 && dim > 0 && points && (count == 1 || stride >= dim + is_rat))
+        {
+            GBoundingBox bbox;
+            glm::vec3 P(0.0, 0.0, 0.0);
+            float w;
+            int i = 0, wi;
+            const auto identity = glm::identity<glm::mat4>();
+            if (xform && *xform == identity)
+            {
+                xform = 0;
+            }
+            wi = dim;
+            if (dim > 3)
+            {
+                dim = 3;
+            }
+
+            rc = true;
+            if (is_rat)
+            {
+                // skip bogus starting points
+                while (count > 0 && points[wi] == 0.0)
+                {
+                    count--;
+                    points += stride;
+                    rc = false;
+                }
+                if (count <= 0)
+                    return false;
+            }
+         
+            memcpy(&bbox.min_.x, points, dim * sizeof(bbox.min_.x));
+            if (is_rat)
+            {
+                w = 1.0f / points[wi];
+                bbox.min_.x *= w; bbox.min_.y *= w; bbox.min_.z *= w;
+            }
+            if (xform)
+            {
+               // bbox.min_ *= (*xform);
+            }
+            bbox.max_ = bbox.min_;
+            points += stride;
+            count--;
+
+            if (count > 0)
+            {
+                if (is_rat)
+                {
+                    // homogeneous rational points
+                    if (xform)
+                    {
+                        //for ( /*empty*/; count--; points += stride)
+                        //{
+                        //    if (0.0 == (w = points[wi]))
+                        //    {
+                        //        rc = false;
+                        //        continue;
+                        //    }
+                        //    memcpy(&P.x, points, dim * sizeof(P.x));
+                        //    w = 1.0 / w;
+                        //    P.x *= w; P.y *= w; P.z *= w;
+                        //    P *= (*xform);
+                        //    if (bbox.min_.x > P.x) bbox.min_.x = P.x; else if (bbox.max_.x < P.x) bbox.max_.x = P.x;
+                        //    if (bbox.min_.y > P.y) bbox.min_.y = P.y; else if (bbox.max_.y < P.y) bbox.max_.y = P.y;
+                        //    if (bbox.min_.z > P.z) bbox.min_.z = P.z; else if (bbox.max_.z < P.z) bbox.max_.z = P.z;
+                        //}
+                        //if (dim < 3)
+                        //{
+                        //    for (i = dim; i < 3; i++)
+                        //    {
+                        //        bbox.min_[i] = 0.0;
+                        //        bbox.max_[i] = 0.0;
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        for ( /*empty*/; count--; points += stride)
+                        {
+                            if (0.0f == (w = points[wi]))
+                            {
+                                rc = false;
+                                continue;
+                            }
+                            memcpy(&P.x, points, dim * sizeof(P.x));
+                            w = 1.0f / w;
+                            P.x *= w; P.y *= w; P.z *= w;
+                            if (bbox.min_.x > P.x) bbox.min_.x = P.x; else if (bbox.max_.x < P.x) bbox.max_.x = P.x;
+                            if (bbox.min_.y > P.y) bbox.min_.y = P.y; else if (bbox.max_.y < P.y) bbox.max_.y = P.y;
+                            if (bbox.min_.z > P.z) bbox.min_.z = P.z; else if (bbox.max_.z < P.z) bbox.max_.z = P.z;
+                        }
+                    }
+                }
+                else
+                {
+                    // bounding box of non-rational points
+                    if (xform)
+                    {
+                        //for ( /*empty*/; count--; points += stride)
+                        //{
+                        //    memcpy(&P.x, points, dim * sizeof(P.x));
+                        //    P *= (*xform);
+                        //    if (bbox.min_.x > P.x) bbox.min_.x = P.x; else if (bbox.max_.x < P.x) bbox.max_.x = P.x;
+                        //    if (bbox.min_.y > P.y) bbox.min_.y = P.y; else if (bbox.max_.y < P.y) bbox.max_.y = P.y;
+                        //    if (bbox.min_.z > P.z) bbox.min_.z = P.z; else if (bbox.max_.z < P.z) bbox.max_.z = P.z;
+                        //}
+                        //if (dim < 3)
+                        //{
+                        //    for (i = dim; i < 3; i++)
+                        //    {
+                        //        bbox.min_[i] = 0.0;
+                        //        bbox.max_[i] = 0.0;
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        for ( /*empty*/; count--; points += stride)
+                        {
+                            memcpy(&P.x, points, dim * sizeof(P.x));
+                            if (bbox.min_.x > P.x) bbox.min_.x = P.x; else if (bbox.max_.x < P.x) bbox.max_.x = P.x;
+                            if (bbox.min_.y > P.y) bbox.min_.y = P.y; else if (bbox.max_.y < P.y) bbox.max_.y = P.y;
+                            if (bbox.min_.z > P.z) bbox.min_.z = P.z; else if (bbox.max_.z < P.z) bbox.max_.z = P.z;
+                        }
+                    }
+                }
+            }
+
+            tight_bbox.Union(bbox);
+        }
+        else if (bGrowBox)
+        {
+            // result is still valid if no points are added to a valid input box
+            rc = (0 == count);
+        }
+
+        return rc;
     }
 
     glm::vec3 GBoundingBox::Center() const

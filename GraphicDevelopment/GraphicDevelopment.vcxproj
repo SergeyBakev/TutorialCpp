@@ -171,6 +171,7 @@
     <None Include="Shaders\grid_shader.vs" />
     <None Include="Shaders\simple_fragment_shader.glsl" />
     <None Include="Shaders\simple_vertex_shader.glsl" />
+    <None Include="Shaders\simple_vertex_shader_not_matrix.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GGraphic\GGraphic.vcxproj">

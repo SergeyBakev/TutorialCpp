@@ -25,6 +25,11 @@ namespace Common
 			pnt_.y_ = pnt.y;
 		}
 
+		GBoundingBox GPoint::OnGetBBox() const
+		{
+			return GBoundingBox(glm::vec3(pnt_.x_, pnt_.y_, pnt_.z_));
+		}
+
 		void GPoint::OnDraw()
 		{
 			GraphicElementBase::OnDraw();

@@ -2,13 +2,13 @@
 struct GLFWwindow;
 class GWindow2dManger;
 
-class GWindow2d
+class GWindow
 {
 public:
-	using MouseCallBack = std::function<void(GWindow2d*, int button, int action, int mods)>;
-	using MouseMoveCallBack = std::function<void(GWindow2d*, double xpos, double ypos)>;
-	GWindow2d() = delete;
-	GWindow2d(size_t width, size_t height, std::string_view title);
+	using MouseCallBack = std::function<void(GWindow*, int button, int action, int mods)>;
+	using MouseMoveCallBack = std::function<void(GWindow*, double xpos, double ypos)>;
+	GWindow() = delete;
+	GWindow(size_t width, size_t height, std::string_view title);
 
 	bool IsShouldClose() const;
 	void SwapBuffer();

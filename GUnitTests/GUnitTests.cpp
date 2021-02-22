@@ -3,13 +3,20 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+
 namespace GUnitTests
 {
 	using namespace Common;
 
-	TEST_CLASS(GBoundingBoxTest)
+	
+
+	TEST_CLASS(GBoundingBoxTest) 
 	{
 	public:
+		TEST_CLASS_INITIALIZE(Init)
+		{
+			int z = 3;
+		}
 		
 		TEST_METHOD(Initialize_Bbox)
 		{
