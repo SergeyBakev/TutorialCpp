@@ -163,6 +163,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="GBoundingBox.h" />
     <ClInclude Include="GCContext.h" />
+    <ClInclude Include="ge_color.h" />
     <ClInclude Include="ge_utils.h" />
     <ClInclude Include="ge_validation.h" />
     <ClInclude Include="ge_vec.h" />

@@ -37,5 +37,6 @@
 #include "ge_utils.h"
 #include "GVector3d.h"
 #include "ge_vec.h"
+#include "ge_color.h"
 
 using glm3Vectors = std::vector<glm::vec3>;

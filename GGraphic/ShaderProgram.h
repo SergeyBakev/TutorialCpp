@@ -15,7 +15,8 @@ namespace Common
 
             ShaderProgram(ShaderProgram&& other) noexcept;
 
-            void SetMatrix4(std::string_view name, const glm::mat4& matrix);
+            void SetUniformMatrix4(std::string_view name, const glm::mat4& matrix);
+            bool GetUniformMatrix(std::string_view name, const glm::mat4& matrix);
 
             GLuint GetAtribLocation(std::string_view name) const;
 

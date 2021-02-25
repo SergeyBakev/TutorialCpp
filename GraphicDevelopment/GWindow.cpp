@@ -44,6 +44,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		//GWindow2dManger::Instanse()->GetWindow(window)->ResetTransform();
 		//viewMatrix *= glm::inverse(viewMatrix);
 	}
+	if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+	{
+		win->Rotate(20.f,glm::vec3(0,1,1));
+	}
+
+	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+	{
+
+	}
+
+	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+	{
+		
+	}
+
+	
 }
 
 void mouse_callback(GLFWwindow* window, int button, int action, int mods)
@@ -261,6 +277,11 @@ void GWindow::Rotate(const glm::vec3& vec)
 	OnRotate(p0, v);
 }
 
+void GWindow::Rotate(float angle, const glm::vec3& axis)
+{
+	viewMatrix_ = glm::rotate(glm::radians(angle), axis);
+}
+
 void GWindow::Move(double xoff, double yoff)
 {
 	viewMatrix_ = glm::translate(viewMatrix_, glm::vec3(xoff, yoff, 0.f));
@@ -444,7 +465,7 @@ bool GWindow::OnRotate(const glm::vec3& p, const glm::vec3& v)
 	// определяем вектор, вокруг которого осуществляем вращение
 	auto norm = glm::cross(v1, v);
 
-	viewMatrix_ = glm::translate(viewMatrix_, norm);
+	viewMatrix_ = glm::translate(viewMatrix_, pc);
 	Common::Unitize(norm);
 
 	// определяем угол поворота
@@ -454,7 +475,7 @@ bool GWindow::OnRotate(const glm::vec3& p, const glm::vec3& v)
 	float cosg = glm::dot(v1,v2);
 	float angle = glm::degrees(acos(cosg));
 	viewMatrix_ = glm::rotate(viewMatrix_, angle, norm);
-	viewMatrix_ = glm::translate(viewMatrix_, {-pc.x,-pc.y,-pc.z});
+	viewMatrix_ = glm::translate(viewMatrix_, -pc);
 	
 	return true;
 }
@@ -535,11 +556,11 @@ void GWindow::OnDraw()
 		if (!shader_->IsUsed())
 			shader_->Use();
 
-		shader_->SetMatrix4("projection", projectionMatrix_);
-		shader_->SetMatrix4("view", viewMatrix_);
+		shader_->SetUniformMatrix4("projection", projectionMatrix_);
+		shader_->SetUniformMatrix4("view", viewMatrix_);
 
 		glm::mat4 model = glm::identity<glm::mat4>();
-		shader_->SetMatrix4("model", model);
+		shader_->SetUniformMatrix4("model", model);
 		//DrawAxis();
 		context_.Render();
 		shader_->Unuse();

@@ -25,6 +25,9 @@
     <Filter Include="GeometryBase">
       <UniqueIdentifier>{12a12d83-767f-47b9-bee8-564950f5c3d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Color">
+      <UniqueIdentifier>{e95225b5-8474-4128-82ea-66e4312bc85f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -86,6 +89,9 @@
     </ClInclude>
     <ClInclude Include="ge_vec.h">
       <Filter>GeometryBase</Filter>
+    </ClInclude>
+    <ClInclude Include="ge_color.h">
+      <Filter>Color</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

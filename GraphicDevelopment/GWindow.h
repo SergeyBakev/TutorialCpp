@@ -40,6 +40,7 @@ public:
 	
 	void Rotate(double xoff,double yoff, double zoff);
 	void Rotate(const glm::vec3& vec);
+	void Rotate(float angle,const glm::vec3& axis);
 	void Move(double xoff, double yoff);
 	void Move(const glm::vec3& vec);
 	

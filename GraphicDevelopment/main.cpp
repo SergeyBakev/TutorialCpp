@@ -319,32 +319,44 @@ void print(glm::mat4& m);
 void print(glm::vec4& vec);
 void print(glm::vec3& vec);
 
-//#define GL_APP
+#define GL_APP
 
 #ifdef GL_APP
 
 int main()
 {
-    std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
-    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
+    std::string vertexShaderFile = "Shaders\\simple_vertex_shader_no_color.glsl";
+    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader_no_color.glsl";
 
     GWindow window((GLsizei)WIDTH, (GLsizei)HEIGHT, "Test");
     auto manager = ResourceManager::Instance();
     ShaderProgramPtr shader = manager->CreateShader("test", vertexShaderFile, fragmentShaderFile);
     if (shader == nullptr)
         return -1;
+    shader->Use();
     shader->SetAtribsLocation({ {0,"vertex_pos"s} });
+  /*  shader->SetAtribsLocation({ {1,"in_color"s} });*/
     window.SetShader(shader);
     
 
-    glm::vec3 p0 = { -1,-1,0 };
-    glm::vec3 p1 = {  1, 1, 0 };
-    window.AddGraphicElement(G_MAKE(GQuad)(p0, p1));
+    glm::vec3 p0 = {  0.5, 0.5, 0 };
+    glm::vec3 p1 = {  -0.5, 0.5, 0 };
+    glm::vec3 p2 = {  -0.5, 0-.5, 0 };
+    glm::vec3 p3 = {  0.5, 0-.5, 0 };
+
+    /*glm::vec3 p0 = { 0.0, 0.0, 0 };
+    glm::vec3 p1 = { 0.5, 0.5, 0 };
+    window.AddGraphicElement(G_MAKE(GQuad)(p0,p1))->SetSize(10);*/
+    window.AddGraphicElement(G_MAKE(GPoint)(p0))->SetSize(10);
+    window.AddGraphicElement(G_MAKE(GPoint)(p1))->SetSize(10);
+    window.AddGraphicElement(G_MAKE(GPoint)(p2))->SetSize(10);
+    window.AddGraphicElement(G_MAKE(GPoint)(p3))->SetSize(10);
     window.ZoomAll();
 
+    glEnable(GL_DEPTH_TEST);
     while (!window.IsShouldClose())
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1, 1, 1,1);
         glfwPollEvents();
      
@@ -357,6 +369,127 @@ int main()
 }
 
 #else
+
+glm::mat4 viewMatrix = glm::identity<glm::mat4>();
+glm::mat4 modelMatrix = glm::identity<glm::mat4>();
+glm::mat4 projMatrix = glm::identity<glm::mat4>();
+glm::vec3 curretMousePos;
+
+glm::vec3 pc = { 0,0,0 };
+
+glm::vec4 viewPort;
+
+glm3Vectors rotateAxis;
+
+namespace CallBack
+{
+    bool isMouseBnt1Presed;
+    bool isMouseBnt3Presed;
+
+    void mouse_callback(GLFWwindow* window, int button, int action, int mods)
+    {
+        if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+        {
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            //std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_PRESSED:\t" << x << "\t" << y << std::endl;
+            isMouseBnt1Presed = true;
+        }
+
+        if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_PRESS)
+        {
+            isMouseBnt3Presed = true;
+        }
+
+        if (button == GLFW_MOUSE_BUTTON_3 && action == GLFW_RELEASE)
+        {
+            isMouseBnt3Presed = false;
+        }
+        if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
+        {
+
+            isMouseBnt1Presed = false;
+            //std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_RELEASE:\t" <</* cur_x_pos << "\t" << cur_y_pos << */std::endl;
+        }
+
+    }
+
+    void cursor_moved(GLFWwindow* window, double xpos, double ypos)
+    {
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        glm::vec3 newPos(x, y, 0);
+
+        std::cout << "cursor_moved:" << x << "\t" << y << std::endl;
+        if (isMouseBnt1Presed && !isMouseBnt3Presed)
+        {
+            rotateAxis.clear();
+            glm::vec4 p0t = (projMatrix * viewMatrix )* glm::vec4(curretMousePos,1.0); /*glm::project(curretMousePos, viewMatrix * modelMatrix, projMatrix, viewPort);*/
+            glm::vec4 p1t = (projMatrix * viewMatrix) * glm::vec4(newPos, 1.0);//glm::project(newPos, viewMatrix * modelMatrix, projMatrix, viewPort);
+           
+            glm::vec3 p0 = utils::to_vec3(p0t);
+            glm::vec3 p1 = utils::to_vec3(p1t);
+
+            glm::vec3 p = p0;
+            glm::vec3 v = p1 - p;
+
+            rotateAxis.emplace_back(p1);
+            rotateAxis.emplace_back(p0);
+            //test
+            glm::vec3 vr = { 0.5,0.5,0 };
+            double r = Common::Length2(vr);
+
+            glm::vec3 v1 = p - pc;
+
+            rotateAxis.emplace_back(p);
+            rotateAxis.emplace_back(pc);
+
+            auto norm = glm::cross(v1, v);
+            
+            /*double Lv1 = Common::Length2(v1);
+            v1 *= r / Lv1;*/
+        }
+
+        if (isMouseBnt3Presed && !isMouseBnt1Presed)
+        {
+       
+        }
+
+        curretMousePos = newPos;
+
+    }
+    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+    {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, GL_TRUE);
+        if (key == GLFW_KEY_HOME && action == GLFW_PRESS)
+        {
+            viewMatrix = glm::identity<glm::mat4>();
+        }
+        if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+        {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(5.f), glm::vec3(1, 0, 0));
+        }
+
+        if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+        {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(-5.f), glm::vec3(1, 0, 0));
+        }
+
+        if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+        {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(-5.f), glm::vec3(0, 1, 0));
+        }
+
+        if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+        {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(5.f), glm::vec3(0, 1, 0));
+        }
+
+
+    }
+}
+
 void Initialize(GLFWwindow*& window)
 {
     if (!glfwInit())
@@ -374,48 +507,90 @@ void Initialize(GLFWwindow*& window)
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK)
         throw std::runtime_error("Could not initialize GLEW");
+
+    viewPort = { 0,0,800,800 };
+    glfwSetKeyCallback(window, CallBack::key_callback);
+    glfwSetCursorPosCallback(window, CallBack::cursor_moved);
+    glfwSetMouseButtonCallback(window, CallBack::mouse_callback);
+    glViewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
 }
+
+
 int main()
 {
     GLFWwindow* window = nullptr;
     Initialize(window);
-    std::string vertexShaderFile = "Shaders\\simple_vertex_shader_not_matrix.glsl";
+    std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
     std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
     auto manager = ResourceManager::Instance();
     ShaderProgramPtr shader = manager->CreateShader("test", vertexShaderFile, fragmentShaderFile);
     if (shader == nullptr)
         return -1;
-
+    shader->Use();
     shader->SetAtribsLocation({ {0,"vertex_pos"s} });
+    shader->SetAtribsLocation({ {1,"in_color"s} });
 
-    glm::mat4 identity = glm::identity<glm::mat4>();
-    shader->SetMatrix4("projection", identity);
-    shader->SetMatrix4("view", identity);
-    shader->SetMatrix4("model", identity);
+
+    shader->SetUniformMatrix4("projection", projMatrix);
+    projMatrix = glm::ortho(0.f, 800.f, 800.f, 0.f);
     
   
-    glm3Vectors v2 =
+    glm3Vectors xaxsis =
     {
-        {-0.5,-0.5,0.5},
-        {-0.5,0.5,0.5},
-        {0.5,0.5,0.5},
-        {0.5,-0.5,0.5},
-        {-0.5,0.5,-0.5},
-        {-0.5,0.5,-0.5},
-        {0.5,0.5,-0.5},
-        {0.5,-0.5,-0.5},
+        {0,0,0},
+        {0.5,0,0}
     };
 
-    glPointSize(10);
+    glm3Vectors yaxsis =
+    {
+        {0,0,0},
+        {0,0.5,0}
+    };
+
+    glm3Vectors zaxsis =
+    {
+        {0,0,0},
+        {0,0,0.5}
+    };
+
+    glEnable(GL_DEPTH_TEST);
+
+    glm::vec3 p0(0.5, 0.5, 0);
+    glm::vec3 p1(-0.5, 0.5, 0);
+    glm::vec3 p2(-0.5, -0.5, 0);
+    glm::vec3 p3(0.5, -0.5, 0);
+    glm3Vectors quad;
+    quad.push_back(p2);
+    quad.push_back(p1);
+    quad.push_back(p0);
+    quad.push_back(p3);
+    //viewMatrix = glm::translate(viewMatrix,glm::vec3(0, -0.5, 0));
+    
+    //viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0.5, 0));
+    /*auto test = glm::vec4(xaxsis[1],1) * viewMatrix;
+    auto test = glm::vec4(y[1],1) * viewMatrix;*/
+    //viewMatrix = glm::translate(glm::vec3(0, 0, 0.5));
     while (!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1, 1, 1, 1);
         glfwPollEvents();
-        shader->Use();
 
-        utils::draw_array_object(v2, GL_QUADS);
+        shader->SetUniformMatrix4("view", viewMatrix);
+        shader->SetUniformMatrix4("model", modelMatrix);
 
+
+        //utils::draw_array_object(quad, GL_QUADS);
+        for (size_t i = 0; i < rotateAxis.size(); i += 2)
+        {
+            glLineWidth(2);
+            if(i == 0)
+                utils::draw_line(rotateAxis[i], rotateAxis[i + 1], { 1,0,0 });
+            else if(i == 2)
+                utils::draw_line(rotateAxis[i], rotateAxis[i + 1], { 0,1,0 });
+            
+        }
+        
         glfwSwapBuffers(window);
     }
 

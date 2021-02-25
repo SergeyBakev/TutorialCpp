@@ -49,12 +49,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\grid_shader.fs">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\grid_shader.vs">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\simple_fragment_shader.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -64,7 +58,10 @@
     <None Include="Shaders\circle_vshader.vs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\simple_vertex_shader_not_matrix.glsl">
+    <None Include="Shaders\simple_fragment_shader_no_color.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\simple_vertex_shader_no_color.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

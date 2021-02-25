@@ -4,74 +4,64 @@
 #include <thread>
 #include <chrono>
 #include <future>
+#include <memory>
 #include <functional>
 
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 
-
-
-void watch_dog(bool stop)
-{
-    std::chrono::duration<double> delta = 3.5s;
-    while (!stop)
-    {
-        
-        auto start_sleep = std::chrono::system_clock::now();
-        std::this_thread::sleep_for(3s);
-        auto end_sleep = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end_sleep - start_sleep;
-        if (elapsed_seconds > delta)
-            std::cout << "Program in debug!!!\n";
-    }
-    
-
-}
-
-class WatchDog
+using BasePtr = std::shared_ptr<class Base>;
+class Base
 {
 public:
-
-    void Run()
-    {
-        _thread = std::thread(&WatchDog::Loop,this);
-    }
-
-    void Stop()
-    {
-        _stoped = true;
-    }
-
-private:
-    void Loop()
-    {
-        std::chrono::duration<double> delta = 3.5s;
-        while (!_stoped)
-        {
-
-            auto start_sleep = std::chrono::system_clock::now();
-            std::this_thread::sleep_for(3s);
-            auto end_sleep = std::chrono::system_clock::now();
-            std::chrono::duration<double> elapsed_seconds = end_sleep - start_sleep;
-            if (elapsed_seconds > delta)
-                std::cout << "Program in debug!!!\n";
-        }
-    }
-
-private:
-    bool _stoped = false;
-    std::thread _thread;
+    virtual BasePtr Do() = 0;
 };
 
-double func(double a,double b)
+class AbstractBase : public Base, protected std::enable_shared_from_this<AbstractBase>
 {
-    return a + b;
-}
+
+public:
+    virtual BasePtr Do() override 
+    {
+        OnDo();
+        return shared_from_this();
+    }
+
+    virtual ~AbstractBase()
+    {
+        std::cout << "AbstractBase dtor\n";
+    }
+protected:
+    AbstractBase() {};
+    virtual void OnDo(){}
+};
+
+class A : public AbstractBase
+{
+public:
+    virtual ~A()
+    {
+        std::cout << "A dtor\n";
+    }
+
+ protected:
+    virtual void OnDo() override
+    {
+    
+    }
+};
 int main()
 {
-    auto f = std::bind(func, 2, _1);
-    double tes  = f(5,3);
-   
+    std::shared_ptr<A> a = std::make_shared<A>();
+    auto base = a->Do();
+    int z = 3;
+
+    {
+        std::shared_ptr<A> a = std::make_shared<A>();
+        auto base = a->Do();
+        int z = 3;
+    }
+    
     return -1;
 }
 

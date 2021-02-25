@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Graphic.h"
+#include "GVertexBufferObject.h"
 
 void print(glm::mat4& m);
 namespace Common
@@ -9,29 +10,31 @@ namespace Common
         using namespace Common::Resources;
 
 		void GraphicElementBase::Draw()
-		{
+		{          
+            if (shader_ != nullptr)
+            {
+                shader_->SetUniformMatrix4("model", model_);
+                if (!shader_->IsUsed())
+                    shader_->Use();
+            }
             GLuint vao;
             glGenVertexArrays(1, &vao);
             glBindVertexArray(vao);
 
-          /*  GLuint colors_vbo = 0;
-            glGenBuffers(1, &colors_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(color_), &color_, GL_DYNAMIC_DRAW);
-
-            glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+           /* std::vector<ColorRGB> colors;
+            colors.push_back(color_);
+            colors.push_back(color_);
+            colors.push_back(color_);
+            Graphic::GVertexBuffer c;
+            c.Atach(colors.data(), (GLsizei)(colors.size() * sizeof(color_)));
+            c.Bind();
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
             glEnableVertexAttribArray(1);*/
-            if (shader_ != nullptr)
-            {
-                shader_->SetMatrix4("model", model_);
-                if (!shader_->IsUsed())
-                    shader_->Use();
-            }
-            
-            OnDraw();
-            //shader_->Unuse();
 
+            OnDraw();
+            
+            //c.Unbind();
+            glBindVertexArray(0);
             glDeleteVertexArrays(1, &vao);
 		}
 
@@ -96,14 +99,27 @@ namespace Common
             print(model_);
         }
 
-        void GraphicElementBase::SetColor(float r, float g, float b)
+        GraphicElementPtr GraphicElementBase::SetColor(float r, float g, float b)
         {
             color_ = { r,g,b };
+            return shared_from_this();
         }
 
-        void GraphicElementBase::SetSize(float size)
+        GraphicElementPtr GraphicElementBase::SetColor(const ColorRGB& color)
+        {
+            color_ = color;
+            return shared_from_this();
+        }
+
+        ColorRGB GraphicElementBase::GetColor() const
+        {
+            return color_;
+        }
+
+        GraphicElementPtr GraphicElementBase::SetSize(float size)
         {
             size_ = size;
+            return shared_from_this();
         }
         float GraphicElementBase::GetSize() const
         {

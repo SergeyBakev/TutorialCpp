@@ -167,11 +167,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\circle_vshader.vs" />
-    <None Include="Shaders\grid_shader.fs" />
-    <None Include="Shaders\grid_shader.vs" />
     <None Include="Shaders\simple_fragment_shader.glsl" />
+    <None Include="Shaders\simple_fragment_shader_no_color.glsl" />
     <None Include="Shaders\simple_vertex_shader.glsl" />
-    <None Include="Shaders\simple_vertex_shader_not_matrix.glsl" />
+    <None Include="Shaders\simple_vertex_shader_no_color.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GGraphic\GGraphic.vcxproj">
