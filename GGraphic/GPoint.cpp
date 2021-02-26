@@ -15,14 +15,16 @@ namespace Common
 
 		GPoint::GPoint(const glm::vec3& pnt) 
 		{
-			pnt_.x_ = pnt[0];
-			pnt_.y_ = pnt[1];
+			pnt_.x_ = pnt.x;
+			pnt_.y_ = pnt.y;
+			pnt_.z_ = pnt.z;
 		}
 
 		GPoint::GPoint(const glm::vec4& pnt) 
 		{
 			pnt_.x_ = pnt.x;
 			pnt_.y_ = pnt.y;
+			pnt_.z_ = pnt.z;
 		}
 
 		GBoundingBox GPoint::OnGetBBox() const
@@ -38,41 +40,21 @@ namespace Common
 
 		void GPoint::DrawPoint()
 		{
+			glPointSize(GetSize());
 			GVertexBuffer vertex;
 			vertex.Atach(&pnt_, sizeof(pnt_));
 			vertex.Bind();
 
-			glPointSize(GetSize());
+			
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(0);
 			
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 
-		GPointPtr MakeGPoint(double x, double y)
-		{
-			return std::make_shared<GPoint>(x, y);
-		}
+		
 
-		GPointPtr MakeGPoint(float x, float y)
-		{
-			return std::make_shared<GPoint>((double)x, (double)y);
-		}
-
-		GPointPtr MakeGPoint(double x, double y, double z)
-		{
-			return std::make_shared<GPoint>(x, y);
-		}
-
-		GPointPtr MakeGPoint(float x, float y, float z)
-		{
-			return std::make_shared<GPoint>((double)x, (double)y);
-		}
-
-		GPointPtr MakeGPoint(const glm::vec3& v)
-		{
-			return std::make_shared<GPoint>((double)v.x, (double)v.y);
-		}
+		
 
 	}
 }

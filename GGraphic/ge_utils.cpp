@@ -7,8 +7,17 @@ namespace Common
 	{
 		bool draw_array(const glm3Vectors& points, GLenum drawMode)
 		{
-            ColorRGB r = { 1.0,0.0,0.0 };
-            return draw_array(points, drawMode, r);
+            Graphic::GVertexBuffer v;
+            v.Atach(points.data(), (GLsizei)(points.size() * sizeof(glm::vec3)));
+
+            v.Bind();
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glEnableVertexAttribArray(0);
+
+            glDrawArrays(drawMode, 0, (GLsizei)(points.size()));
+
+            v.Unbind();
+            return true;
 		}
 
         bool draw_array(const glm3Vectors& points, GLenum drawMode, const ColorRGB& color)
@@ -24,8 +33,6 @@ namespace Common
 
             Graphic::GVertexBuffer c;
             c.Atach(colors.data(), (GLsizei)(colors.size() * sizeof(color)));
-
-            
 
             v.Bind();
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);

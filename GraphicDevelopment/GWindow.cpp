@@ -46,17 +46,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	if (key == GLFW_KEY_UP && action == GLFW_PRESS)
 	{
-		win->Rotate(20.f,glm::vec3(0,1,1));
+		win->OnUp(5.f);
 	}
 
 	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
 	{
-
+		win->OnDown(-5.f);
 	}
 
 	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
 	{
-		
+		win->OnLeft(-5.f);
+	}
+
+	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+	{
+		win->OnRight(5.f);
 	}
 
 	
@@ -292,6 +297,32 @@ void GWindow::Move(const glm::vec3& vec)
 	Move(vec[0], vec[1]);
 }
 
+void GWindow::OnUp(float angle)
+{
+	OnRotate(glm::radians(angle), glm::vec3(1, 0, 0));
+}
+
+void GWindow::OnDown(float angle)
+{
+	OnRotate(glm::radians(angle), glm::vec3(1, 0, 0));
+}
+
+void GWindow::OnLeft(float angle)
+{
+	OnRotate(glm::radians(angle), glm::vec3(0, 1, 0));
+}
+
+void GWindow::OnRight(float angle)
+{
+
+	OnRotate(glm::radians(angle), glm::vec3(0, 1, 0));
+}
+
+bool GWindow::OnRotate(float angle, const glm::vec3& axis)
+{
+	viewMatrix_ = glm::rotate(viewMatrix_,angle, axis);
+	return true;
+}
 void GWindow::SetMouseCallBack(MouseCallBack function)
 {
 	mouseCallBack_ = function;
@@ -464,21 +495,21 @@ bool GWindow::OnRotate(const glm::vec3& p, const glm::vec3& v)
 
 	// определяем вектор, вокруг которого осуществляем вращение
 	auto norm = glm::cross(v1, v);
-
-	viewMatrix_ = glm::translate(viewMatrix_, pc);
+	
+	//viewMatrix_ = glm::translate(viewMatrix_, pc);
 	Common::Unitize(norm);
-
 	// определяем угол поворота
 	Common::Unitize(v1);
 	Common::Unitize(v2);
 
 	float cosg = glm::dot(v1,v2);
-	float angle = glm::degrees(acos(cosg));
+	float angle = acos(cosg);
 	viewMatrix_ = glm::rotate(viewMatrix_, angle, norm);
-	viewMatrix_ = glm::translate(viewMatrix_, -pc);
+	//viewMatrix_ = glm::translate(viewMatrix_, -pc);
 	
 	return true;
 }
+
 
 bool GWindow::OnUpdateSizeSpace()
 {

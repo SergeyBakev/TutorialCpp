@@ -24,6 +24,7 @@ namespace Common
             Point2D GetCord() const { return pnt_; }
 
         protected:
+
             virtual GBoundingBox OnGetBBox() const override;
             virtual void OnDraw() override;
 
@@ -33,13 +34,9 @@ namespace Common
 
         private:
             Point2D pnt_;
+
+            // Inherited via GraphicElementBase
+        
         };
-
-        using GPointPtr = std::shared_ptr<GPoint>;
-
-        GPointPtr MakeGPoint(float x, float y);
-        GPointPtr MakeGPoint(double x, double y,double z);
-        GPointPtr MakeGPoint(float x, float y, float z);
-        GPointPtr MakeGPoint(const glm::vec3& v);
 	}
 }

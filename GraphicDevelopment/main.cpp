@@ -280,16 +280,26 @@ namespace Common
         public:
             DECLARE_G_OBJ(GQuad, GraphicElementBase)
 
-            GQuad(const glm::vec3& p1, const glm::vec3& p2) : bbox_(p1,p2)
+            GQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4)
             {
-                bbox_.GetCorners(corners_);
+                corners_ = { p1,p2,p3,p4 };
+                GBoundingBox::GetPointListBoundingBox(3, 0, 4, 3, (float*)corners_.data(), bbox_, false, nullptr);
+                
             }
-
         protected:
             virtual void OnDraw() override
             {
                 base::OnDraw();
-                utils::draw_array(corners_, GL_POINTS);
+                glPointSize(10);
+                Graphic::GVertexBuffer v;
+                v.Atach(corners_.data(), (GLsizei)(corners_.size() * sizeof(corners_[0])));
+                v.Bind();
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+                glEnableVertexAttribArray(0);
+
+                
+                glDrawArrays(GL_QUADS, 0, (GLsizei)(corners_.size()));
+                v.Unbind();
             }
 
             virtual GBoundingBox OnGetBBox() const override
@@ -323,10 +333,79 @@ void print(glm::vec3& vec);
 
 #ifdef GL_APP
 
+void DrawCube(GWindow& window)
+{
+    //// Top face(y = 1.0f)
+    //{
+    //    glm::vec3 p0(1.0f, 1.0f, -1.0f);
+    //    glm::vec3 p1(-1.0f, 1.0f, -1.0f);
+    //    glm::vec3 p2(-1.0f, 1.0f, 1.0f);
+    //    glm::vec3 p3(1.0f, 1.0f, 1.0f);
+
+    //    window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor({ 1.0f, 0.5f, 0.0f });
+    //}
+
+    //// Bottom face (y = -1.0f)
+    //{
+    //    glm::vec3 p0(1.0f, -1.0f, 1.0f);
+    //    glm::vec3 p1(-1.0f, -1.0f, 1.0f);
+    //    glm::vec3 p2(-1.0f, -1.0f, -1.0f);
+    //    glm::vec3 p3(1.0f, -1.0f, -1.0);
+    //    window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor(GREEN);
+    //}
+    // Front face  (z = 1.0f)
+    {
+        glm::vec3 p0(1.0f, 1.0f, 1.0f);
+        glm::vec3 p1(-1.0f, 1.0f, 1.0f);
+        glm::vec3 p2(-1.0f, -1.0f, 1.0);
+        glm::vec3 p3(1.0f, -1.0f, 1.0f);
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(2).SetColor(RED);
+        Line line( {0, 0, 0 }, { 1, 1, 1 });
+        window.AddGraphicElement(G_MAKE(GLine)(line))->SetSize(2).SetColor(BLACK);
+
+        
+        glm::vec3 begin = { -0.169705644 ,-1.17379737,1 };
+        glm::vec3 end = { -0.205060959 ,-1.17379737,1 };
+        Line line2(begin,end);
+        window.AddGraphicElement(G_MAKE(GLine)(line2))->SetSize(2).SetColor(BLACK);
+
+    }
+
+    
+    //// Back face (z = -1.0f)
+    //{
+    //    glm::vec3 p0(1.0f, -1.0f, -1.0f);
+    //    glm::vec3 p1(-1.0f, -1.0f, -1.0f);
+    //    glm::vec3 p2(-1.0f, 1.0f, -1.0f);
+    //    glm::vec3 p3(1.0f, 1.0f, -1.0);
+    //    window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor({ 1.0f, 1.0f, 0.0f });
+    //}
+    //
+
+    //// Left face (x = -1.0f)
+    //{
+    //    glm::vec3 p0(-1.0f, 1.0f, 1.0f);
+    //    glm::vec3 p1(-1.0f, 1.0f, -1.0f);
+    //    glm::vec3 p2(-1.0f, -1.0f, -1.0f);
+    //    glm::vec3 p3(-1.0f, -1.0f, 1.0f);
+    //    window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor(BLUE);
+    //}
+
+
+    ////// Right face (x = 1.0f)
+    //{
+    //    glm::vec3 p0(1.0f, 1.0f, -1.0f);
+    //    glm::vec3 p1(1.0f, 1.0f, 1.0f);
+    //    glm::vec3 p2(1.0f, -1.0f, 1.0f);
+    //    glm::vec3 p3(1.0f, -1.0f, -1.0f);
+    //    window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor({ 1,0,1 });
+    //}
+}
+
 int main()
 {
-    std::string vertexShaderFile = "Shaders\\simple_vertex_shader_no_color.glsl";
-    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader_no_color.glsl";
+    std::string vertexShaderFile = "Shaders\\simple_vertex_shader.glsl";
+    std::string fragmentShaderFile = "Shaders\\simple_fragment_shader.glsl";
 
     GWindow window((GLsizei)WIDTH, (GLsizei)HEIGHT, "Test");
     auto manager = ResourceManager::Instance();
@@ -335,22 +414,11 @@ int main()
         return -1;
     shader->Use();
     shader->SetAtribsLocation({ {0,"vertex_pos"s} });
-  /*  shader->SetAtribsLocation({ {1,"in_color"s} });*/
+    shader->SetAtribsLocation({ {1,"in_color"s} });
     window.SetShader(shader);
     
+    DrawCube(window);
 
-    glm::vec3 p0 = {  0.5, 0.5, 0 };
-    glm::vec3 p1 = {  -0.5, 0.5, 0 };
-    glm::vec3 p2 = {  -0.5, 0-.5, 0 };
-    glm::vec3 p3 = {  0.5, 0-.5, 0 };
-
-    /*glm::vec3 p0 = { 0.0, 0.0, 0 };
-    glm::vec3 p1 = { 0.5, 0.5, 0 };
-    window.AddGraphicElement(G_MAKE(GQuad)(p0,p1))->SetSize(10);*/
-    window.AddGraphicElement(G_MAKE(GPoint)(p0))->SetSize(10);
-    window.AddGraphicElement(G_MAKE(GPoint)(p1))->SetSize(10);
-    window.AddGraphicElement(G_MAKE(GPoint)(p2))->SetSize(10);
-    window.AddGraphicElement(G_MAKE(GPoint)(p3))->SetSize(10);
     window.ZoomAll();
 
     glEnable(GL_DEPTH_TEST);
@@ -512,7 +580,7 @@ void Initialize(GLFWwindow*& window)
     glfwSetKeyCallback(window, CallBack::key_callback);
     glfwSetCursorPosCallback(window, CallBack::cursor_moved);
     glfwSetMouseButtonCallback(window, CallBack::mouse_callback);
-    glViewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
+    glViewport((GLint)viewPort[0], (GLint)viewPort[1], (GLint)viewPort[2], (GLint)viewPort[3]);
 }
 
 

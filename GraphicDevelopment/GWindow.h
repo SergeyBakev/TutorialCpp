@@ -44,6 +44,10 @@ public:
 	void Move(double xoff, double yoff);
 	void Move(const glm::vec3& vec);
 	
+	void OnUp(float angle);
+	void OnDown(float angle);
+	void OnLeft(float angle);
+	void OnRight(float angle);
 
 	void SetMouseCallBack(MouseCallBack function);
 	void SetMouseMoveCallBack(MouseMoveCallBack function);
@@ -77,11 +81,11 @@ public:
 protected:
 	
 	virtual bool OnRotate(const glm::vec3& p, const glm::vec3& v);
-
+	virtual bool OnRotate(float angle, const glm::vec3& axis);
 	virtual bool OnUpdateSizeSpace();
+
 private:
 	void UpdateProjection(float width, float height);
-
 	void DrawAxis();
 	void DrawGrid();
 
