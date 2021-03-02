@@ -89,7 +89,7 @@ protected:
 	virtual bool OnUpdateSizeSpace();
 
 private:
-	void UpdateProjection(float width, float height);
+	void UpdateProjection(float width, float height, float far);
 	void DrawAxis();
 	void DrawGrid();
 

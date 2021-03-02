@@ -16,8 +16,10 @@ void print(glm::vec4& m);
 #ifdef DEBUG_ROTATE
 GraphicElementPtr dragVector;
 GraphicElementPtr toStartpoint;
+GraphicElementPtr toEndpoint;
 GraphicElementPtr tickPoint;
 GraphicElementPtr startTickPoint;
+GraphicElementPtr normalVector;
 #endif
 
 bool isMouseBnt1Presed = false;
@@ -56,6 +58,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		win->RemoveGraphicElement(startTickPoint);
 		win->RemoveGraphicElement(dragVector);
 		win->RemoveGraphicElement(toStartpoint);
+		win->RemoveGraphicElement(normalVector);
 #endif // 0
 
 		
@@ -313,17 +316,24 @@ void GWindow::Rotate(double xoff, double yoff, double zoff)
 }
 void GWindow::Rotate(const glm::vec3& vec)
 {
-	
-
 	auto p0 = GetUnprojCurMousePos();
 	auto p1 = Unproject(vec);
-
+#ifdef DEBUG_ROTATE
 	{
 		if (tickPoint != nullptr)
 			RemoveGraphicElement(tickPoint);
 
 		if (startTickPoint != nullptr)
 			RemoveGraphicElement(startTickPoint);
+
+		if (toStartpoint != nullptr)
+			RemoveGraphicElement(toStartpoint);
+
+		if (toEndpoint != nullptr)
+			RemoveGraphicElement(toEndpoint);
+
+		if (normalVector != nullptr)
+			RemoveGraphicElement(normalVector);
 
 		startTickPoint = G_MAKE(GPoint)(p0);
 		startTickPoint->SetSize(5).SetColor({ 1,0.5,1 });
@@ -332,7 +342,11 @@ void GWindow::Rotate(const glm::vec3& vec)
 		tickPoint = G_MAKE(GPoint)(p1);
 		tickPoint->SetSize(5).SetColor({ 1,0.5,1 });
 		AddGraphicElement(tickPoint);
+
+		
+
 	}
+#endif
 	glm::vec3 v = p1 - p0;
 	if (!Common::detial::IsValid(v))
 		return;
@@ -541,44 +555,43 @@ void GWindow::Update()
 
 bool GWindow::OnRotate(const glm::vec3& p0, const glm::vec3& v)
 {
-	if (toStartpoint != nullptr)
-		RemoveGraphicElement(toStartpoint);
-
 	auto m_DimModel = context_.GetBBox();
 	if (!m_DimModel.IsValid())
 		return false;
 	
-
 	glm::vec3 pc = m_DimModel.Center();
 	float r = glm::length(glm::vec3(m_DimModel.Max() - pc));
 	glm::vec3 v1 = (p0 - pc);
 	float Lv1 = glm::length(v1);
-	//v1 = v1 * (r / Lv1);
-
+	v1 *= r / Lv1;
+	glm::vec3 v2 = v1 + v;
+	glm::vec3 norm = glm::cross(v1, v);
+	norm = glm::normalize(norm);
 
 #ifdef DEBUG_ROTATE
+	normalVector = G_MAKE(GLine)(Line(p0, norm));
+	normalVector->SetSize(4).SetColor(BLACK);
+	AddGraphicElement(normalVector);
 
 	toStartpoint = G_MAKE(GLine)(Line(pc, v1));
 	toStartpoint->SetSize(4).SetColor(BLACK);
 	AddGraphicElement(toStartpoint);
 
-	/*if (dragVector != nullptr)
-		RemoveGraphicElement(dragVector);
-	dragVector = G_MAKE(GLine)(Line(p0, v));
-	dragVector->SetSize(5).SetColor(BLUE);
-	AddGraphicElement(dragVector);
+	/*toEndpoint = G_MAKE(GLine)(Line(p0, pc));
+	toEndpoint->SetSize(4).SetColor(BLACK);
+	AddGraphicElement(toEndpoint);*/
+#endif
 
-	if (toStartpoint != nullptr)
-		RemoveGraphicElement(dragVector);
-	toStartpoint = G_MAKE(GLine)(Line(pc, p0));
-	toStartpoint->SetSize(5).SetColor(GREEN);
-	AddGraphicElement(toStartpoint);*/
-#endif // DEBUG_R
+	
+	
+	v1 = glm::normalize(v1);
+	v2 = glm::normalize(v2);
 
+	float cosg = glm::dot(v1, v2);
+	float angle = acos(cosg);
+	
+	Rotate(angle, norm);
 
-	/*Move(pc);
-	Rotate(0.5, norm);
-	Move(-pc);*/
 	return true;
 }
 
@@ -597,17 +610,14 @@ bool GWindow::OnUpdateSizeSpace()
 	else
 		rh /= fAspect;
 
-	UpdateProjection(rw, rh);
+	UpdateProjection(rw, rh,rz);
 
 	return true;
 }
 
-void GWindow::UpdateProjection(float width, float height)
+void GWindow::UpdateProjection(float width, float height, float zFar)
 {
-	projectionMatrix_ = glm::ortho(-width, width, -height, height);
-	// projectionMatrix *= glm::ortho(-(float)WIDTH / 2.f, (float)WIDTH / 2.f, -(float)WIDTH / 2.f, (float)WIDTH / 2.f, -1.f, 1.f);
-	//projectionMatrix_ = glm::ortho(0.f, width, height, 0.f, 0.f, 1.f);
-	//projectionMatrix_ = glm::inverse(projectionMatrix_);
+	projectionMatrix_ = glm::ortho(-width, width, -height, height,-zFar, zFar);
 }
 
 void GWindow::DrawAxis()
