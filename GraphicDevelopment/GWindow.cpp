@@ -3,12 +3,22 @@
 #include "Window2dManager.h"
 
 using namespace Common::Graphic;
+using namespace Common::GeometryPrimitive;
 using namespace Common;
 using namespace Common::Resources;
+
+#define DEBUG_ROTATE
 
 void print(glm::mat4& m);
 void print(glm::vec3& m);
 void print(glm::vec4& m);
+
+#ifdef DEBUG_ROTATE
+GraphicElementPtr dragVector;
+GraphicElementPtr toStartpoint;
+GraphicElementPtr tickPoint;
+GraphicElementPtr startTickPoint;
+#endif
 
 bool isMouseBnt1Presed = false;
 bool isMouseBnt3Presed = false;
@@ -41,12 +51,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_HOME && action == GLFW_PRESS)
 	{
 		win->ResetTransform();
+#ifdef DEBUG_ROTATE
+		win->RemoveGraphicElement(tickPoint);
+		win->RemoveGraphicElement(startTickPoint);
+		win->RemoveGraphicElement(dragVector);
+		win->RemoveGraphicElement(toStartpoint);
+#endif // 0
+
+		
 		//GWindow2dManger::Instanse()->GetWindow(window)->ResetTransform();
 		//viewMatrix *= glm::inverse(viewMatrix);
 	}
 	if (key == GLFW_KEY_UP && action == GLFW_PRESS)
 	{
 		win->OnUp(5.f);
+	}
+
+	if (key == GLFW_KEY_KP_5 && action == GLFW_PRESS)
+	{
+		win->OnRotate(5.f, { 0,0,1 });
 	}
 
 	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
@@ -72,9 +95,9 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
 	auto win = GWindow2dManger::Instanse()->GetWindow(window);
 	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
 	{
-		double x, y;
-		glfwGetCursorPos(window, &x, &y);
 		//std::cout << "GLFW_MOUSE_BUTTON_1 GLFW_PRESSED:\t" << x << "\t" << y << std::endl;
+		auto curMouse = win->GetUnprojCurMousePos();
+		
 		isMouseBnt1Presed = true;
 	}
 
@@ -101,8 +124,7 @@ void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 	auto win = GWindow2dManger::Instanse()->GetWindow(window);
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
-	glm::vec3 newPos(x,y,0);
-	
+	glm::vec3 newPos = win->ToWindowPoint((float)x, (float)y);
 	//glm::vec3 newPos = win->Unproject(x, y);
 	if (isMouseBnt1Presed && !isMouseBnt3Presed)
 	{
@@ -110,7 +132,7 @@ void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 		auto translate = win->Unproject(newPos) - curPos;
 		if (!Common::detial::IsValid(translate))
 			return;
-		win->Move(translate[0],-translate[1]);
+		win->Move(translate[0],translate[1]);
 
 	}
 
@@ -118,7 +140,7 @@ void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 	{
 		win->Rotate(newPos);
 	}
-	
+
 	win->SetMouseCoorditane(newPos);
 	
 }
@@ -157,6 +179,7 @@ GWindow::GWindow(size_t width, size_t height, std::string_view title) :
 	Manadger()->Register(this, window_);
 	Manadger()->RegisterByName(title.data(),this);
 
+	glDisable(GL_LIGHTING);
 	glfwSetKeyCallback(window_, key_callback);
 	glfwSetCursorPosCallback(window_, cursor_moved);
 	glfwSetMouseButtonCallback(window_, mouse_callback);
@@ -182,6 +205,13 @@ Common::Graphic::GraphicElementPtr GWindow::AddGraphicElement(const Common::Grap
 	context_.Add(element);
 	Update();
 	return element;
+}
+
+Common::Graphic::GraphicElementPtr GWindow::RemoveGraphicElement(const Common::Graphic::GraphicElementPtr& element)
+{
+	auto el =  context_.Remove(element);
+	Update();
+	return el;
 }
 
 glm::mat4 GWindow::GetProjectionMatrix() const
@@ -216,7 +246,7 @@ Common::Resources::ShaderProgramPtr GWindow::GetSahder()
 
 glm::vec3 GWindow::Unproject(const glm::vec3& vec) const
 {
-	return glm::unProject(vec, model_, projectionMatrix_, viewPort_);
+	return glm::unProject(vec, viewMatrix_ * model_ , projectionMatrix_, viewPort_);
 }
 
 glm::vec3 GWindow::Unproject(float x, float y, float z) const
@@ -242,6 +272,16 @@ glm::vec3 GWindow::Project(float x, float y, float z) const
 glm::vec3 GWindow::Project(float x, float y) const
 {
 	return Project({ x,y,0 });
+}
+
+glm::vec3 GWindow::ToWindowPoint(const glm::vec3& viewPoint) const
+{
+	return { viewPoint.x, height_ - viewPoint.y,0 };
+}
+
+glm::vec3 GWindow::ToWindowPoint(float x, float y) const
+{
+	return ToWindowPoint({ x,y,0 });
 }
 
 GLFWwindow* GWindow::Handle() const
@@ -271,20 +311,38 @@ void GWindow::Rotate(double xoff, double yoff, double zoff)
 {
 	Rotate({ xoff,yoff,zoff });
 }
-
 void GWindow::Rotate(const glm::vec3& vec)
 {
-	auto p0 = Unproject(GetCurMousePos());
-	auto p1 = Unproject(vec);
 	
+
+	auto p0 = GetUnprojCurMousePos();
+	auto p1 = Unproject(vec);
+
+	{
+		if (tickPoint != nullptr)
+			RemoveGraphicElement(tickPoint);
+
+		if (startTickPoint != nullptr)
+			RemoveGraphicElement(startTickPoint);
+
+		startTickPoint = G_MAKE(GPoint)(p0);
+		startTickPoint->SetSize(5).SetColor({ 1,0.5,1 });
+		AddGraphicElement(startTickPoint);
+
+		tickPoint = G_MAKE(GPoint)(p1);
+		tickPoint->SetSize(5).SetColor({ 1,0.5,1 });
+		AddGraphicElement(tickPoint);
+	}
 	glm::vec3 v = p1 - p0;
-	_ASSERT(Common::detial::IsValid(v));
+	if (!Common::detial::IsValid(v))
+		return;
+
 	OnRotate(p0, v);
 }
 
 void GWindow::Rotate(float angle, const glm::vec3& axis)
 {
-	viewMatrix_ = glm::rotate(glm::radians(angle), axis);
+	viewMatrix_ = glm::rotate(angle, axis);
 }
 
 void GWindow::Move(double xoff, double yoff)
@@ -361,6 +419,7 @@ glm::vec3 GWindow::SetMouseCoorditane(double x, double y)
 glm::vec3 GWindow::SetMouseCoorditane(const glm::vec3& vec)
 {
 	curMousePos_ = vec;
+	//curMousePos_.y = -curMousePos_.y;
 	return curMousePos_;
 }
 
@@ -479,34 +538,47 @@ void GWindow::Update()
 	SetSpaceSize((float)bbox.MaximumDistanceTo({ 0,0,0 }));
 }
 
-bool GWindow::OnRotate(const glm::vec3& p, const glm::vec3& v)
+
+bool GWindow::OnRotate(const glm::vec3& p0, const glm::vec3& v)
 {
+	if (toStartpoint != nullptr)
+		RemoveGraphicElement(toStartpoint);
+
 	auto m_DimModel = context_.GetBBox();
 	if (!m_DimModel.IsValid())
 		return false;
+	
 
 	glm::vec3 pc = m_DimModel.Center();
-	glm::vec3 	vr = (m_DimModel.Max() - pc);
-	double r = Common::Length2(vr);
-	glm::vec3  v1 = (p - pc);
-	double Lv1 =  Common::Length2(v1);
-	v1 *= r / Lv1; // нормировка вектора величиной радиуса модели
-	auto v2 = v1 + v;
+	float r = glm::length(glm::vec3(m_DimModel.Max() - pc));
+	glm::vec3 v1 = (p0 - pc);
+	float Lv1 = glm::length(v1);
+	//v1 = v1 * (r / Lv1);
 
-	// определяем вектор, вокруг которого осуществляем вращение
-	auto norm = glm::cross(v1, v);
-	
-	//viewMatrix_ = glm::translate(viewMatrix_, pc);
-	Common::Unitize(norm);
-	// определяем угол поворота
-	Common::Unitize(v1);
-	Common::Unitize(v2);
 
-	float cosg = glm::dot(v1,v2);
-	float angle = acos(cosg);
-	viewMatrix_ = glm::rotate(viewMatrix_, angle, norm);
-	//viewMatrix_ = glm::translate(viewMatrix_, -pc);
-	
+#ifdef DEBUG_ROTATE
+
+	toStartpoint = G_MAKE(GLine)(Line(pc, v1));
+	toStartpoint->SetSize(4).SetColor(BLACK);
+	AddGraphicElement(toStartpoint);
+
+	/*if (dragVector != nullptr)
+		RemoveGraphicElement(dragVector);
+	dragVector = G_MAKE(GLine)(Line(p0, v));
+	dragVector->SetSize(5).SetColor(BLUE);
+	AddGraphicElement(dragVector);
+
+	if (toStartpoint != nullptr)
+		RemoveGraphicElement(dragVector);
+	toStartpoint = G_MAKE(GLine)(Line(pc, p0));
+	toStartpoint->SetSize(5).SetColor(GREEN);
+	AddGraphicElement(toStartpoint);*/
+#endif // DEBUG_R
+
+
+	/*Move(pc);
+	Rotate(0.5, norm);
+	Move(-pc);*/
 	return true;
 }
 

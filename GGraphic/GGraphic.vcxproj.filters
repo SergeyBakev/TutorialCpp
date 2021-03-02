@@ -93,6 +93,21 @@
     <ClInclude Include="ge_color.h">
       <Filter>Color</Filter>
     </ClInclude>
+    <ClInclude Include="Circle.h">
+      <Filter>GeometryBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Arc.h">
+      <Filter>GeometryBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Line.h">
+      <Filter>GeometryBase</Filter>
+    </ClInclude>
+    <ClInclude Include="GLine.h">
+      <Filter>GL</Filter>
+    </ClInclude>
+    <ClInclude Include="GCircle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -142,6 +157,21 @@
     </ClCompile>
     <ClCompile Include="ge_vec.cpp">
       <Filter>GeometryBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Circle.cpp">
+      <Filter>GeometryBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Arc.cpp">
+      <Filter>GeometryBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Line.cpp">
+      <Filter>GeometryBase</Filter>
+    </ClCompile>
+    <ClCompile Include="GLine.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GCircle.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

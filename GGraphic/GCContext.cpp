@@ -20,6 +20,25 @@ namespace Common
 			elements_.push_back(el);
 		}
 
+		GraphicElementPtr GCContext::Remove(GraphicElementPtr el)
+		{
+			if (el == nullptr)
+				return nullptr;
+
+			auto it = std::remove_if(std::begin(elements_), std::end(elements_), [&el](const GraphicElementPtr& shape)
+				{
+					if (el.get() == shape.get())
+						return true;
+					return false;
+				}
+			);
+
+			if (it != std::end(elements_))
+				elements_.erase(it, std::end(elements_));
+			
+			return el;
+		}
+
 		void GCContext::Render()
 		{
 			for (const auto el : elements_)

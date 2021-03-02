@@ -67,6 +67,7 @@ bool Common::Unitize(glm::vec3& v)
 		}
 		else if (d > 0.0 && _finitef(d))
 		{
+			_ASSERT(0);
 			// This code is rarely used and can be slow.
 			// It multiplies by 2^1023 in an attempt to 
 			// normalize the coordinates.

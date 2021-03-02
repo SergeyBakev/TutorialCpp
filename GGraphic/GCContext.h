@@ -13,6 +13,7 @@ namespace Common
 			~GCContext();
 
 			void Add(GraphicElementPtr el);
+			GraphicElementPtr Remove(GraphicElementPtr el);
 			void Render();
 			void Clear();
 			GBoundingBox GetBBox() const;

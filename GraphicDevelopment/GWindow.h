@@ -14,6 +14,7 @@ public:
 	void SwapBuffer();
 
 	Common::Graphic::GraphicElementPtr AddGraphicElement(const Common::Graphic::GraphicElementPtr& element);
+	Common::Graphic::GraphicElementPtr RemoveGraphicElement(const Common::Graphic::GraphicElementPtr& element);
 
 	glm::mat4 GetProjectionMatrix() const;
 	glm::mat4 GetModelMatrix() const;
@@ -31,6 +32,8 @@ public:
 	glm::vec3 Project(float x, float y, float z) const;
 	glm::vec3 Project(float x, float y) const;
 
+	glm::vec3 ToWindowPoint(const glm::vec3& viewPoint) const;
+	glm::vec3 ToWindowPoint(float x, float y) const;
 
 	GLFWwindow* Handle() const;
 
@@ -48,6 +51,8 @@ public:
 	void OnDown(float angle);
 	void OnLeft(float angle);
 	void OnRight(float angle);
+	virtual bool OnRotate(const glm::vec3& p, const glm::vec3& v);
+	virtual bool OnRotate(float angle, const glm::vec3& axis);
 
 	void SetMouseCallBack(MouseCallBack function);
 	void SetMouseMoveCallBack(MouseMoveCallBack function);
@@ -55,7 +60,7 @@ public:
 	MouseCallBack GetMouseCallBack() const;
 	MouseMoveCallBack GetMouseMoveCallBack() const;
 
-
+	
 	glm::vec3 GetCurMousePos() const;
 	glm::vec3 GetUnprojCurMousePos() const;
 	glm::vec3 SetMouseCoorditane(double x, double y);
@@ -80,8 +85,7 @@ public:
 	void Update();
 protected:
 	
-	virtual bool OnRotate(const glm::vec3& p, const glm::vec3& v);
-	virtual bool OnRotate(float angle, const glm::vec3& axis);
+	
 	virtual bool OnUpdateSizeSpace();
 
 private:
