@@ -43,28 +43,28 @@ namespace Common
            
         }
 
-        GraphicElement& GraphicElementBase::Scale(float x, float y, float z)
+        GraphicElementPtr GraphicElementBase::Scale(float x, float y, float z)
         {
             OnScale(x, y, z);
-            return *this;
+            return shared_from_this();
         }
 
-        GraphicElement& GraphicElementBase::Scale(float scaleFactor)
+       GraphicElementPtr GraphicElementBase::Scale(float scaleFactor)
         {
             Scale(scaleFactor, scaleFactor, scaleFactor);
-            return *this;
+            return shared_from_this();
         }
 
-        GraphicElement& GraphicElementBase::Translate(float x, float y, float z)
+       GraphicElementPtr GraphicElementBase::Translate(float x, float y, float z)
         {
             OnTranslate(x,y,z);
-            return *this;
+            return shared_from_this();
         }
 
-        GraphicElement& GraphicElementBase::Rotate(float angle, float x, float y, float z)
+       GraphicElementPtr GraphicElementBase::Rotate(float angle, float x, float y, float z)
         {
             OnRotate(angle,x, y, z);
-            return *this;
+            return shared_from_this();
         }
 
         glm::mat4 GraphicElementBase::GetTransofrm() const
@@ -87,38 +87,40 @@ namespace Common
             return shader_;
         }
 
-        GraphicElement& GraphicElementBase::MultMatrix(glm::mat4 transform)
+       GraphicElementPtr GraphicElementBase::MultMatrix(glm::mat4 transform)
         {
             model_ *= transform;
-            return *this;
+            return shared_from_this();
         }
 
-        void GraphicElementBase::OnScale(float x, float y, float z)
+        bool GraphicElementBase::OnScale(float x, float y, float z)
         {
             model_ *= glm::scale(glm::vec3(x, y, z));
+            return true;
         }
 
-        void GraphicElementBase::OnTranslate(float x, float y, float z)
+        bool GraphicElementBase::OnTranslate(float x, float y, float z)
         {
             model_ = glm::translate(model_, { x,y,z });
+            return true;
         }
 
-        void GraphicElementBase::OnRotate(float angle, float x, float y, float z)
+        bool GraphicElementBase::OnRotate(float angle, float x, float y, float z)
         {
             model_ *= glm::rotate(0.5f, glm::vec3(1, 0, 0));
-            print(model_);
+            return true;
         }
 
-        GraphicElement& GraphicElementBase::SetColor(float r, float g, float b)
+       GraphicElementPtr GraphicElementBase::SetColor(float r, float g, float b)
         {
             color_ = { r,g,b };
-            return *this;
+            return shared_from_this();
         }
 
-        GraphicElement& GraphicElementBase::SetColor(const ColorRGB& color)
+       GraphicElementPtr GraphicElementBase::SetColor(const ColorRGB& color)
         {
             color_ = color;
-            return *this;
+            return shared_from_this();
         }
 
         ColorRGB GraphicElementBase::GetColor() const
@@ -126,10 +128,10 @@ namespace Common
             return color_;
         }
 
-        GraphicElement& GraphicElementBase::SetSize(float size)
+       GraphicElementPtr GraphicElementBase::SetSize(float size)
         {
             size_ = size;
-            return *this;
+            return shared_from_this();
         }
         float GraphicElementBase::GetSize() const
         {

@@ -36,6 +36,9 @@
     <ClCompile Include="Window2dManager.cpp">
       <Filter>Window</Filter>
     </ClCompile>
+    <ClCompile Include="LlightLamp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -46,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="Window2dManager.h">
       <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="LlightLamp.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -58,10 +64,10 @@
     <None Include="Shaders\circle_vshader.vs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\simple_fragment_shader_no_color.glsl">
+    <None Include="Shaders\lamp_fragment_shader.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\simple_vertex_shader_no_color.glsl">
+    <None Include="Shaders\lamp_vertex_shader.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

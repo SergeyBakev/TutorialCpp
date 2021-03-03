@@ -192,6 +192,7 @@
     <ClCompile Include="GBoundingBox.cpp" />
     <ClCompile Include="GCContext.cpp" />
     <ClCompile Include="GCircle.cpp" />
+    <ClCompile Include="ge_color.cpp" />
     <ClCompile Include="ge_utils.cpp" />
     <ClCompile Include="ge_validation.cpp" />
     <ClCompile Include="ge_vec.cpp" />

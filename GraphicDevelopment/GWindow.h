@@ -1,7 +1,8 @@
 #pragma once
+#include "LlightLamp.h"
+
 struct GLFWwindow;
 class GWindow2dManger;
-
 class GWindow
 {
 public:
@@ -83,6 +84,7 @@ public:
 	float GetSpaceSize() const;
 
 	void Update();
+	LightLamp& GetLamp();
 protected:
 	
 	
@@ -103,7 +105,7 @@ private:
 	GLFWwindow* window_;
 	Common::Graphic::GCContext context_;
 	Common::Resources::ShaderProgramPtr shader_;
-	
+	LightLamp lamp_;
 	float spaceSize_ = 1;
 	double scale_x_ = 1.0;
 	double scale_y_ = 1.0;

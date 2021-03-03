@@ -7,7 +7,7 @@ using namespace Common::GeometryPrimitive;
 using namespace Common;
 using namespace Common::Resources;
 
-#define DEBUG_ROTATE
+//#define DEBUG_ROTATE
 
 void print(glm::mat4& m);
 void print(glm::vec3& m);
@@ -24,24 +24,33 @@ GraphicElementPtr normalVector;
 
 bool isMouseBnt1Presed = false;
 bool isMouseBnt3Presed = false;
+bool isMouseCtrlPresed = false;
 float fovy = 45;
 float scale = 1.1f;
 
 #pragma region Window callback
 
+float amb = 0.1f;
 void scroled(GLFWwindow* win, double xoffset, double yoffset)
 {
 	GWindow* window = GWindow2dManger::Instanse()->GetWindow(win);
 	auto mat = glm::identity<glm::mat4>(); //glm::translate(viewMatrix, glm::vec3(1.f));
-	if (yoffset == 1)
+	if (isMouseCtrlPresed)
 	{
-		window->Scale(1.05f, 1.05);
-		//viewMatrix  = glm::scale(viewMatrix, glm::vec3(1.05f, 1.05f, 1.f));
+		
 	}
 	else
 	{
-		window->Scale(0.95, 0.95);
-		//viewMatrix = glm::scale(viewMatrix, glm::vec3(0.95, 0.95f, 1.f));
+		if (yoffset == 1)
+		{
+			window->Scale(1.05f, 1.05);
+			//viewMatrix  = glm::scale(viewMatrix, glm::vec3(1.05f, 1.05f, 1.f));
+		}
+		else
+		{
+			window->Scale(0.95, 0.95);
+			//viewMatrix = glm::scale(viewMatrix, glm::vec3(0.95, 0.95f, 1.f));
+		}
 	}
 }
 
@@ -73,6 +82,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_KP_5 && action == GLFW_PRESS)
 	{
 		win->OnRotate(5.f, { 0,0,1 });
+	}
+
+	if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
+	{
+		isMouseCtrlPresed = true;
+	}
+
+	if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_RELEASE)
+	{
+		isMouseCtrlPresed = false;
 	}
 
 	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
@@ -156,6 +175,7 @@ void on_resize(GLFWwindow* window, int width, int height)
 
 #pragma endregion
 
+#pragma region GWindow implementation
 
 GWindow::GWindow(size_t width, size_t height, std::string_view title) :
 	width_(width), height_(height),title_(title)
@@ -252,6 +272,11 @@ glm::vec3 GWindow::Unproject(const glm::vec3& vec) const
 	return glm::unProject(vec, viewMatrix_ * model_ , projectionMatrix_, viewPort_);
 }
 
+glm::vec3 GWindow::Project(const glm::vec3& vec) const
+{
+	return glm::project(vec, viewMatrix_ * model_, projectionMatrix_, viewPort_);
+}
+
 glm::vec3 GWindow::Unproject(float x, float y, float z) const
 {
 	return Unproject({ x, y, z });
@@ -260,11 +285,6 @@ glm::vec3 GWindow::Unproject(float x, float y, float z) const
 glm::vec3 GWindow::Unproject(float x, float y) const
 {
 	return Unproject(x, y, 0);
-}
-
-glm::vec3 GWindow::Project(const glm::vec3& vec) const
-{
-	return glm::project(vec, model_, projectionMatrix_, viewPort_);
 }
 
 glm::vec3 GWindow::Project(float x, float y, float z) const
@@ -300,14 +320,6 @@ void GWindow::MainLoop()
 void GWindow::Scale(double xoff, double yoff)
 {
 	projectionMatrix_ = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 1.f));
-	//print(viewMatrix_);
-	//viewMatrix_ = glm::translate(viewMatrix_, { vec2[0],vec2[1],vec[2]});
-	//projectionMatrix_  = glm::scale(projectionMatrix_, glm::vec3(xoff, yoff, 0.f));
-	/*
-	context_.ForEach([=](GraphicElementPtr obj) 
-		{
-			obj->Scale((float)xoff, (float)yoff, 0.f); 
-		});*/
 }
 
 void GWindow::Rotate(double xoff, double yoff, double zoff)
@@ -342,9 +354,6 @@ void GWindow::Rotate(const glm::vec3& vec)
 		tickPoint = G_MAKE(GPoint)(p1);
 		tickPoint->SetSize(5).SetColor({ 1,0.5,1 });
 		AddGraphicElement(tickPoint);
-
-		
-
 	}
 #endif
 	glm::vec3 v = p1 - p0;
@@ -356,7 +365,7 @@ void GWindow::Rotate(const glm::vec3& vec)
 
 void GWindow::Rotate(float angle, const glm::vec3& axis)
 {
-	viewMatrix_ = glm::rotate(angle, axis);
+	viewMatrix_ = glm::rotate(viewMatrix_,angle, axis);
 }
 
 void GWindow::Move(double xoff, double yoff)
@@ -512,7 +521,6 @@ void GWindow::ZoomIn(const Common::GBoundingBox& bbox)
 	if (!bbox.IsValid())
 		return;
 
-	
 	float XRatio = 1.0;
 	float YRatio = 1.0;
 	auto diagonal = bbox.Diagonal();
@@ -552,21 +560,39 @@ void GWindow::Update()
 	SetSpaceSize((float)bbox.MaximumDistanceTo({ 0,0,0 }));
 }
 
+LightLamp& GWindow::GetLamp()
+{
+	return lamp_;
+}
+
 
 bool GWindow::OnRotate(const glm::vec3& p0, const glm::vec3& v)
 {
+	glm::vec3 test = { 397,442,0 };
+	auto vec = Unproject(test);
 	auto m_DimModel = context_.GetBBox();
 	if (!m_DimModel.IsValid())
 		return false;
-	
+
 	glm::vec3 pc = m_DimModel.Center();
 	float r = glm::length(glm::vec3(m_DimModel.Max() - pc));
 	glm::vec3 v1 = (p0 - pc);
 	float Lv1 = glm::length(v1);
 	v1 *= r / Lv1;
-	glm::vec3 v2 = v1 + v;
+
 	glm::vec3 norm = glm::cross(v1, v);
+	glm::vec3 v2 = v1 + v;
+
 	norm = glm::normalize(norm);
+	v1 = glm::normalize(v1);
+	v2 = glm::normalize(v2);
+
+
+	float cosg = glm::dot(v1, v2);
+	float angle = acos(cosg);
+	Move(pc);
+	Rotate(angle, norm);
+	Move(-pc);
 
 #ifdef DEBUG_ROTATE
 	normalVector = G_MAKE(GLine)(Line(p0, norm));
@@ -582,15 +608,6 @@ bool GWindow::OnRotate(const glm::vec3& p0, const glm::vec3& v)
 	AddGraphicElement(toEndpoint);*/
 #endif
 
-	
-	
-	v1 = glm::normalize(v1);
-	v2 = glm::normalize(v2);
-
-	float cosg = glm::dot(v1, v2);
-	float angle = acos(cosg);
-	
-	Rotate(angle, norm);
 
 	return true;
 }
@@ -618,6 +635,7 @@ bool GWindow::OnUpdateSizeSpace()
 void GWindow::UpdateProjection(float width, float height, float zFar)
 {
 	projectionMatrix_ = glm::ortho(-width, width, -height, height,-zFar, zFar);
+	//projectionMatrix_ = glm::ortho(-1, 1, -1, 1,-1, 1);
 }
 
 void GWindow::DrawAxis()
@@ -671,7 +689,8 @@ void GWindow::OnDraw()
 
 		shader_->SetUniformMatrix4("projection", projectionMatrix_);
 		shader_->SetUniformMatrix4("view", viewMatrix_);
-
+		shader_->SetUniform3f("lightColor", lamp_.GetColor());
+		shader_->SetUniformf("ambientStrength", lamp_.GetAmbientStrength());
 		glm::mat4 model = glm::identity<glm::mat4>();
 		shader_->SetUniformMatrix4("model", model);
 		//DrawAxis();
@@ -679,3 +698,5 @@ void GWindow::OnDraw()
 		shader_->Unuse();
 	}
 }
+
+#pragma endregion

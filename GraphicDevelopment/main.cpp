@@ -72,8 +72,8 @@ void print(glm::mat4& m);
 void print(glm::vec4& vec);
 void print(glm::vec3& vec);
 
-//#define GL_APP
-#define OPENGL_DRAW
+#define GL_APP
+//#define OPENGL_DRAW
 #ifdef GL_APP
 
 void DrawCube(GWindow& window)
@@ -84,7 +84,8 @@ void DrawCube(GWindow& window)
         glm::vec3 p1(-0.5f, 0.5f, -0.5f);
         glm::vec3 p2(-0.5f, 0.5f, 0.5f);
         glm::vec3 p3(0.5f, 0.5f, 0.5f);
-        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor(RED);
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)
+                                                                ->SetColor(RED);
     }
 
     // Bottom face (y = -0.5f)
@@ -93,7 +94,7 @@ void DrawCube(GWindow& window)
         glm::vec3 p1(-0.5f, -0.5f, 0.5f);
         glm::vec3 p2(-0.5f, -0.5f, -0.5f);
         glm::vec3 p3(0.5f, -0.5f, -0.5f);
-        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor(GREEN);
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor(GREEN);
     }
     //Front face  (z = 0.5f)
     {
@@ -101,7 +102,7 @@ void DrawCube(GWindow& window)
         glm::vec3 p1(-0.5f, 0.5f, 0.5f);
         glm::vec3 p2(-0.5f, -0.5f, 0.5f);
         glm::vec3 p3(0.5f, -0.5f, 0.5f);
-        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor(BLUE);
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor(BLUE);
     }
 
 
@@ -111,7 +112,7 @@ void DrawCube(GWindow& window)
         glm::vec3 p1(-0.5f, -0.5f, -0.5f);
         glm::vec3 p2(-0.5f, 0.5f, -0.5f);
         glm::vec3 p3(0.5f, 0.5f, -0.5f);
-        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor(BLACK);
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor(BLACK);
     }
 
 
@@ -121,7 +122,7 @@ void DrawCube(GWindow& window)
         glm::vec3 p1(-0.5f, 0.5f, -0.5f);
         glm::vec3 p2(-0.5f, -0.5f, -0.5f);
         glm::vec3 p3(-0.5f, -0.5f, 0.5f);
-        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor({ 1,0.5,1 });
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor({ 1,0.5,1 });
     }
 
 
@@ -131,7 +132,7 @@ void DrawCube(GWindow& window)
         glm::vec3 p1(0.5f, 0.5f, 0.5f);
         glm::vec3 p2(0.5f, -0.5f, 0.5f);
         glm::vec3 p3(0.5f, -0.5f, -0.5f);
-        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10).SetColor({ 0.5,0.5,1 });
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor({ 0.5,0.5,1 });
     }
 }
 
@@ -145,9 +146,15 @@ int main()
     ShaderProgramPtr shader = manager->CreateShader("test", vertexShaderFile, fragmentShaderFile);
     if (shader == nullptr)
         return -1;
+
     shader->Use();
     shader->SetAtribsLocation({ {0,"vertex_pos"s} });
     shader->SetAtribsLocation({ {1,"in_color"s} });
+    shader->SetAtribsLocation({ {2,"lightColor"s} });
+    shader->SetAtribsLocation({ {3,"ambientStrength"s} });
+    GVertexBuffer l;
+    glm::vec3 lightColor = { 1,0,0 };
+  
     window.SetShader(shader);
     
     DrawCube(window);
@@ -178,9 +185,7 @@ int main()
 #ifdef OPENGL_DRAW
 
 GLdouble m_ModelMatrix[16];
-// текущая матрица проекций
 GLdouble m_ProjMatrix[16];
-// текущая матрица отображения
 GLint m_Viewport[4];
 
 glm3Vectors points;
@@ -191,10 +196,8 @@ glm3Vectors dragVector2;
 glm3Vectors toStartpoint2;
 glm3Vectors toEndpoint2;
 
-
 glm3Vectors normalVector;
 glm3Vectors P1P0;
-
 
 glm3Vectors tickPoint2;
 glm3Vectors startTickPoint2;
@@ -257,11 +260,15 @@ namespace CallBack
             auto curPos = Unproject(curentMousePos);
             auto translate = Unproject(newPos) - curPos;
             glTranslatef(translate.x, translate.y, 0.f);
+            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
+            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         if (isMouseBnt3Presed && !isMouseBnt1Presed)
         {
             OnRotate(newPos);
+            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
+            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         curentMousePos = newPos;
@@ -281,21 +288,29 @@ namespace CallBack
         if (key == GLFW_KEY_UP && action == GLFW_PRESS)
         {
             glRotatef(5, 1, 0, 0);
+            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
+            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
         {
             glRotatef(-5, 1, 0, 0);
+            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
+            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
         {
             glRotatef(-5, 0, 1, 0);
+            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
+            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
         {
             glRotatef(5, 0, 1, 0);
+            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
+            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
     }
 
@@ -313,6 +328,7 @@ namespace CallBack
         glMatrixMode(GL_MODELVIEW_MATRIX);
     }
 }
+
 void OnRotate(const glm::vec3& vec)
 {
     dragVector2.clear();
@@ -338,20 +354,20 @@ void OnRotate(const glm::vec3& vec)
     v1 *= r / Lv1;
  
     glm::vec3 norm = glm::cross(v1, v);
-    norm = glm::normalize(norm);
-    normalVector.push_back(p0);
-    normalVector.push_back(norm);
     glm::vec3 v2 = v1 + v;
 
+    norm = glm::normalize(norm);
     v1 = glm::normalize(v1);
     v2 = glm::normalize(v2);
 
   
-    float cosg = glm::dot(v1,v2);
-    float angle = glm::degrees(acos(cosg));
-    //glTranslatef(pc.x, pc.y, pc.z);
+    float cosg = acos(glm::dot(v1, v2));
+    float angle = glm::degrees(cosg);
+    glTranslatef(pc.x, pc.y, pc.z);
     glRotatef(angle/*0.5*/, norm.x, norm.y, norm.z);
-    //glTranslatef(-pc.x, -pc.y, -pc.z);
+    glTranslatef(-pc.x, -pc.y, -pc.z);
+
+   
 }
 void Initialize(GLFWwindow*& window)
 {
@@ -516,6 +532,12 @@ int main()
         for (auto& p : quad)
             glVertex3f(p.x, p.y, p.z);
         glEnd();
+
+        glBegin(GL_POINTS);
+        glColor3f(0, 0, 1);
+        for (auto& p : points)
+            glVertex3f(p.x, p.y, p.z);
+        glEnd();
         
         glColor3f(0, 0, 0);
         glBegin(GL_LINE_LOOP);
@@ -533,6 +555,7 @@ int main()
         for (auto& p : dragVector2)
             glVertex3f(p.x, p.y, p.z);
         glEnd();
+
 
         glColor3f(0, 0, 1);
         glBegin(GL_POINTS);
@@ -601,31 +624,7 @@ namespace CallBack
         std::cout << "cursor_moved:" << x << "\t" << y << std::endl;
         if (isMouseBnt1Presed && !isMouseBnt3Presed)
         {
-            rotateAxis.clear();
-            glm::vec4 p0t = (projMatrix * viewMatrix) * glm::vec4(curretMousePos, 1.0); /*glm::project(curretMousePos, viewMatrix * modelMatrix, projMatrix, viewPort);*/
-            glm::vec4 p1t = (projMatrix * viewMatrix) * glm::vec4(newPos, 1.0);//glm::project(newPos, viewMatrix * modelMatrix, projMatrix, viewPort);
-
-            glm::vec3 p0 = utils::to_vec3(p0t);
-            glm::vec3 p1 = utils::to_vec3(p1t);
-
-            glm::vec3 p = p0;
-            glm::vec3 v = p1 - p;
-
-            rotateAxis.emplace_back(p1);
-            rotateAxis.emplace_back(p0);
-            //test
-            glm::vec3 vr = { 0.5,0.5,0 };
-            double r = Common::Length2(vr);
-
-            glm::vec3 v1 = p - pc;
-
-            rotateAxis.emplace_back(p);
-            rotateAxis.emplace_back(pc);
-
-            auto norm = glm::cross(v1, v);
-
-            /*double Lv1 = Common::Length2(v1);
-            v1 *= r / Lv1;*/
+           
         }
 
         if (isMouseBnt3Presed && !isMouseBnt1Presed)
@@ -733,21 +732,7 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 p0(0.5, 0.5, 0);
-    glm::vec3 p1(-0.5, 0.5, 0);
-    glm::vec3 p2(-0.5, -0.5, 0);
-    glm::vec3 p3(0.5, -0.5, 0);
-    glm3Vectors quad;
-    quad.push_back(p2);
-    quad.push_back(p1);
-    quad.push_back(p0);
-    quad.push_back(p3);
-    //viewMatrix = glm::translate(viewMatrix,glm::vec3(0, -0.5, 0));
-
-    //viewMatrix = glm::translate(viewMatrix, glm::vec3(0, 0.5, 0));
-    /*auto test = glm::vec4(xaxsis[1],1) * viewMatrix;
-    auto test = glm::vec4(y[1],1) * viewMatrix;*/
-    //viewMatrix = glm::translate(glm::vec3(0, 0, 0.5));
+  
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

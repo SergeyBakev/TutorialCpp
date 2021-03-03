@@ -173,5 +173,8 @@
     <ClCompile Include="GCircle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ge_color.cpp">
+      <Filter>Color</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

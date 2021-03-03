@@ -14,22 +14,22 @@ namespace Common
         public:
 
             virtual ~GraphicElement() = default;
-            virtual GraphicElement& Scale(float x, float y, float z) = 0;
-            virtual GraphicElement& Scale(float scaleFactor) = 0;
-            virtual GraphicElement& Translate(float x, float y, float z) = 0;
-            virtual GraphicElement& Rotate(float angle,float x, float y, float z) = 0;
-            virtual GraphicElement& MultMatrix(glm::mat4 transform) = 0;
+            virtual GraphicElementPtr Scale(float x, float y, float z) = 0;
+            virtual GraphicElementPtr Scale(float scaleFactor) = 0;
+            virtual GraphicElementPtr Translate(float x, float y, float z) = 0;
+            virtual GraphicElementPtr Rotate(float angle,float x, float y, float z) = 0;
+            virtual GraphicElementPtr MultMatrix(glm::mat4 transform) = 0;
             virtual glm::mat4 GetTransofrm() const = 0;
             virtual GBoundingBox GetBBox() const = 0;
             virtual void SetActiveShader(const Common::Resources::ShaderProgramPtr& shader) = 0;
 
 
-            virtual GraphicElement& SetSize(float size) = 0;
+            virtual GraphicElementPtr SetSize(float size) = 0;
 
             virtual float GetSize() const = 0;
 
-            virtual GraphicElement& SetColor(float r, float g, float b) =0;
-            virtual GraphicElement& SetColor(const ColorRGB& color) =0;
+            virtual GraphicElementPtr SetColor(float r, float g, float b) =0;
+            virtual GraphicElementPtr SetColor(const ColorRGB& color) =0;
             virtual ColorRGB GetColor() const = 0;
 
             virtual Common::Resources::ShaderProgramPtr GetActiveShader() const = 0;
@@ -39,19 +39,19 @@ namespace Common
 
        
 
-        class GraphicElementBase : public GraphicElement /*, public std::enable_shared_from_this<GraphicElementBase>*/
+        class GraphicElementBase : public GraphicElement , public std::enable_shared_from_this<GraphicElementBase>
         {
         public:
 
             virtual void Draw() override;
             virtual ~GraphicElementBase();
-            virtual GraphicElement& Scale(float x, float y, float z) override;
-            virtual GraphicElement& Scale(float scaleFactor)override;
+            virtual GraphicElementPtr Scale(float x, float y, float z) override;
+            virtual GraphicElementPtr Scale(float scaleFactor)override;
 
-            virtual GraphicElement& Translate(float x, float y, float z) override;
-            virtual GraphicElement& Rotate(float angle, float x, float y, float z) override;
+            virtual GraphicElementPtr Translate(float x, float y, float z) override;
+            virtual GraphicElementPtr Rotate(float angle, float x, float y, float z) override;
 
-            virtual GraphicElement& MultMatrix(glm::mat4 transform) override;
+            virtual GraphicElementPtr MultMatrix(glm::mat4 transform) override;
 
             virtual glm::mat4 GetTransofrm() const override;
             virtual GBoundingBox GetBBox() const override;
@@ -59,11 +59,11 @@ namespace Common
             virtual void SetActiveShader(const Common::Resources::ShaderProgramPtr& shader) override;
             virtual Resources::ShaderProgramPtr GetActiveShader() const  override;
 
-            virtual GraphicElement& SetSize(float size) override;
+            virtual GraphicElementPtr SetSize(float size) override;
             virtual float GetSize() const override;
 
-            virtual GraphicElement& SetColor(float r, float g, float b) override;
-            virtual GraphicElement& SetColor(const ColorRGB& color) override;
+            virtual GraphicElementPtr SetColor(float r, float g, float b) override;
+            virtual GraphicElementPtr SetColor(const ColorRGB& color) override;
             virtual ColorRGB GetColor() const;
 
             GraphicElementBase() {}
@@ -72,9 +72,9 @@ namespace Common
 
             virtual void OnDraw() {};
             virtual GBoundingBox OnGetBBox() const { return {}; };
-            virtual void OnScale(float x, float y, float z);
-            virtual void OnTranslate(float x, float y, float z);
-            virtual void OnRotate(float angle, float x, float y, float z);
+            virtual bool OnScale(float x, float y, float z);
+            virtual bool OnTranslate(float x, float y, float z);
+            virtual bool OnRotate(float angle, float x, float y, float z);
 
         private:
             Resources::ShaderProgramPtr shader_;

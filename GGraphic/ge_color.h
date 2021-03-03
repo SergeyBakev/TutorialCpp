@@ -7,6 +7,11 @@ namespace Common
 		float r;
 		float g;
 		float b;
+
+		
+		ColorRGB& operator=(const glm::vec3& color);
+		operator glm::vec3() const { return { r,g,b }; }
+
 	};
 
 	static ColorRGB RED = { 1,0,0 };

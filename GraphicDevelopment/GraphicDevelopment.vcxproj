@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="debug_print.cpp" />
     <ClCompile Include="GWindow.cpp" />
+    <ClCompile Include="LlightLamp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -162,15 +163,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GWindow.h" />
+    <ClInclude Include="LlightLamp.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Window2dManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\circle_vshader.vs" />
+    <None Include="Shaders\lamp_fragment_shader.glsl" />
+    <None Include="Shaders\lamp_vertex_shader.glsl" />
     <None Include="Shaders\simple_fragment_shader.glsl" />
-    <None Include="Shaders\simple_fragment_shader_no_color.glsl" />
     <None Include="Shaders\simple_vertex_shader.glsl" />
-    <None Include="Shaders\simple_vertex_shader_no_color.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GGraphic\GGraphic.vcxproj">

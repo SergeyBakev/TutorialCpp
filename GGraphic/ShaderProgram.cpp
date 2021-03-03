@@ -18,10 +18,22 @@ namespace Common
             other.id_ = 0;
         }
 
+        void ShaderProgram::SetUniformf(std::string_view name, float value)
+        {
+            _ASSERT(IsUsed() != 0);
+            glUniform1f(GetUniformLocation(name), value);
+        }
+
+        void ShaderProgram::SetUniform3f(std::string_view name, const glm::vec3& value)
+        {
+            _ASSERT(IsUsed() != 0);
+            glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
+        }
+
         void ShaderProgram::SetUniformMatrix4(std::string_view name, const glm::mat4& matrix)
         {
             _ASSERT(IsUsed() != 0);
-            glUniformMatrix4fv(glGetUniformLocation(id_, name.data()), 1, GL_FALSE, glm::value_ptr(matrix));
+            glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
         }
 
         bool ShaderProgram::GetUniformMatrix(std::string_view name, const glm::mat4& matrix)
@@ -67,6 +79,11 @@ namespace Common
         {
             glUseProgram(0);
             isUsed_ = false;
+        }
+
+        GLint ShaderProgram::GetUniformLocation(std::string_view name) const
+        {
+            return glGetUniformLocation(id_, name.data());
         }
         
 

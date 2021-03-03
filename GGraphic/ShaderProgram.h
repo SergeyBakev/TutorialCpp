@@ -15,6 +15,8 @@ namespace Common
 
             ShaderProgram(ShaderProgram&& other) noexcept;
 
+            void SetUniformf(std::string_view name, float value);
+            void SetUniform3f(std::string_view name, const glm::vec3& value);
             void SetUniformMatrix4(std::string_view name, const glm::mat4& matrix);
             bool GetUniformMatrix(std::string_view name, const glm::mat4& matrix);
 
@@ -40,7 +42,7 @@ namespace Common
             }
 
         private:
-
+            GLint GetUniformLocation(std::string_view name) const;
         private:
             GLuint id_ = 0;
             GLuint vetexShId_ = 0;
