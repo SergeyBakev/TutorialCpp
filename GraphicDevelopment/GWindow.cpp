@@ -225,6 +225,7 @@ void GWindow::SwapBuffer()
 
 Common::Graphic::GraphicElementPtr GWindow::AddGraphicElement(const Common::Graphic::GraphicElementPtr& element)
 {
+	_ASSERT_EXPR(element != nullptr, L"GWindow::AddGraphicElemen fail. ElementPtr shoul be not nullptr");
 	context_.Add(element);
 	Update();
 	return element;
