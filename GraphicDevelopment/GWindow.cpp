@@ -154,7 +154,7 @@ void cursor_moved(GLFWwindow* window, double xpos, double ypos)
 		auto translate = win->Unproject(newPos) - curPos;
 		if (!Common::detial::IsValid(translate))
 			return;
-		win->Move(translate[0],translate[1]);
+		win->Move(translate);
 
 	}
 
@@ -369,14 +369,14 @@ void GWindow::Rotate(float angle, const glm::vec3& axis)
 	viewMatrix_ = glm::rotate(viewMatrix_,angle, axis);
 }
 
-void GWindow::Move(double xoff, double yoff)
-{
-	viewMatrix_ = glm::translate(viewMatrix_, glm::vec3(xoff, yoff, 0.f));
-}
-
 void GWindow::Move(const glm::vec3& vec)
 {
-	Move(vec[0], vec[1]);
+	viewMatrix_ = glm::translate(viewMatrix_, vec);
+}
+
+void GWindow::Move(float x, float y, float z)
+{
+	Move({ x,y,z });
 }
 
 void GWindow::OnUp(float angle)
