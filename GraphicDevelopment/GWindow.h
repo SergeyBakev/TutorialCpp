@@ -85,9 +85,11 @@ public:
 
 	void Update();
 	LightLamp& GetLamp();
+	void Render();
 protected:
 	
-	
+	virtual void OnStartRender();
+	virtual void OnEndRender();
 	virtual bool OnUpdateSizeSpace();
 
 private:

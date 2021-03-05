@@ -209,7 +209,7 @@ GWindow::GWindow(size_t width, size_t height, std::string_view title) :
 	glfwSetScrollCallback(window_, scroled);
 	glfwSetWindowSizeCallback(window_, on_resize);
 	viewPort_ = { 0, 0, width_, height_ };
-	//glViewport(viewPort_[0], viewPort_[1], viewPort_[2], viewPort_[3]);
+	glViewport(viewPort_[0], viewPort_[1], viewPort_[2], viewPort_[3]);
 }
 
 bool GWindow::IsShouldClose() const
@@ -566,6 +566,11 @@ LightLamp& GWindow::GetLamp()
 	return lamp_;
 }
 
+void GWindow::Render()
+{
+	
+}
+
 
 bool GWindow::OnRotate(const glm::vec3& p0, const glm::vec3& v)
 {
@@ -613,6 +618,14 @@ bool GWindow::OnRotate(const glm::vec3& p0, const glm::vec3& v)
 	return true;
 }
 
+
+void GWindow::OnStartRender()
+{
+}
+
+void GWindow::OnEndRender()
+{
+}
 
 bool GWindow::OnUpdateSizeSpace()
 {

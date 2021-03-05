@@ -12,6 +12,7 @@ namespace Common
             DECLARE_G_OBJ(GLine, GraphicElementBase)
 
             GLine(const GeometryPrimitive::Line& line);
+            GLine(const glm::vec3& p1, const glm::vec3& p2);
 
         protected:
 

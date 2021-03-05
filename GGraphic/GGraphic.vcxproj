@@ -176,6 +176,7 @@
     <ClInclude Include="GPoint.h" />
     <ClInclude Include="GPolygon.h" />
     <ClInclude Include="Graphic.h" />
+    <ClInclude Include="GSpace.h" />
     <ClInclude Include="GVertexArray.h" />
     <ClInclude Include="GVertexBufferObject.h" />
     <ClInclude Include="Include.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="GPoint.cpp" />
     <ClCompile Include="GPolygon.cpp" />
     <ClCompile Include="Graphic.cpp" />
+    <ClCompile Include="GSpace.cpp" />
     <ClCompile Include="GVertexArray.cpp" />
     <ClCompile Include="GVertexBufferObject.cpp" />
     <ClCompile Include="Line.cpp" />

@@ -108,6 +108,9 @@
     <ClInclude Include="GCircle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GSpace.h">
+      <Filter>GL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -175,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="ge_color.cpp">
       <Filter>Color</Filter>
+    </ClCompile>
+    <ClCompile Include="GSpace.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

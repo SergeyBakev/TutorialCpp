@@ -10,6 +10,11 @@ namespace Common
         {
 
         }
+
+        GLine::GLine(const glm::vec3& p1, const glm::vec3& p2) : line_(p1,p2)
+        {
+
+        }
         GBoundingBox GLine::OnGetBBox() const
         {
             return line_.GetBBox();

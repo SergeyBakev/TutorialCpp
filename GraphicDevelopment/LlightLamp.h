@@ -13,8 +13,8 @@ public:
 	bool CanDraw() const;
 	void Draw();
 private:
-	float ambientStrength_ = 0.1f;
-	Common::ColorRGB color_ = { 0,0,0 };
+	float ambientStrength_ = 0.999f;
+	Common::ColorRGB color_ = { 1,1,0 };
 	glm::vec3 possition_ = { std::numeric_limits<float>::infinity(),0,0 };
 
 	Common::Resources::ShaderProgramPtr shader_;

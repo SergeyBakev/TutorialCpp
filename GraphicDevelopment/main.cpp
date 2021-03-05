@@ -72,66 +72,73 @@ void print(glm::mat4& m);
 void print(glm::vec4& vec);
 void print(glm::vec3& vec);
 
-#define GL_APP
-//#define OPENGL_DRAW
+float RangedRand(float fMin, float fMax)
+{
+    float f = (float)rand() / RAND_MAX;
+    return fMin + f * (fMax - fMin);
+}
+//#define GL_APP
+#define OPENGL_DRAW
 #ifdef GL_APP
 
 void DrawCube(GWindow& window)
 {
-    //// Top face(y = 0.5f)
+    //// Top face(y = 1.f)
     {
-        glm::vec3 p0(0.5f, 0.5f, -0.5f);
-        glm::vec3 p1(-0.5f, 0.5f, -0.5f);
-        glm::vec3 p2(-0.5f, 0.5f, 0.5f);
-        glm::vec3 p3(0.5f, 0.5f, 0.5f);
+        glm::vec3 p0(1.f, 1.f, -1.f);
+        glm::vec3 p1(-1.f, 1.f, -1.f);
+        glm::vec3 p2(-1.f, 1.f, 1.f);
+        glm::vec3 p3(1.f, 1.f, 1.f);
         window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)
                                                                 ->SetColor(RED);
-    }
 
-    // Bottom face (y = -0.5f)
+
+    }
+    
+    // Bottom face (y = -1.f)
     {
-        glm::vec3 p0(0.5f, -0.5f, 0.5f);
-        glm::vec3 p1(-0.5f, -0.5f, 0.5f);
-        glm::vec3 p2(-0.5f, -0.5f, -0.5f);
-        glm::vec3 p3(0.5f, -0.5f, -0.5f);
+        glm::vec3 p0(1.f, -1.f, 1.f);
+        glm::vec3 p1(-1.f, -1.f, 1.f);
+        glm::vec3 p2(-1.f, -1.f, -1.f);
+        glm::vec3 p3(1.f, -1.f, -1.f);
         window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor(GREEN);
     }
-    //Front face  (z = 0.5f)
+    //Front face  (z = 1.f)
     {
-        glm::vec3 p0(0.5f, 0.5f, 0.5f);
-        glm::vec3 p1(-0.5f, 0.5f, 0.5f);
-        glm::vec3 p2(-0.5f, -0.5f, 0.5f);
-        glm::vec3 p3(0.5f, -0.5f, 0.5f);
+        glm::vec3 p0(1.f, 1.f, 1.f);
+        glm::vec3 p1(-1.f, 1.f, 1.f);
+        glm::vec3 p2(-1.f, -1.f, 1.f);
+        glm::vec3 p3(1.f, -1.f, 1.f);
         window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor(BLUE);
     }
 
 
-    // Back face (z = -0.5f)
+    // Back face (z = -1.f)
     {
-        glm::vec3 p0(0.5f, -0.5f, -0.5f);
-        glm::vec3 p1(-0.5f, -0.5f, -0.5f);
-        glm::vec3 p2(-0.5f, 0.5f, -0.5f);
-        glm::vec3 p3(0.5f, 0.5f, -0.5f);
+        glm::vec3 p0(1.f, -1.f, -1.f);
+        glm::vec3 p1(-1.f, -1.f, -1.f);
+        glm::vec3 p2(-1.f, 1.f, -1.f);
+        glm::vec3 p3(1.f, 1.f, -1.f);
         window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor(BLACK);
     }
 
 
-    // Left face (x = -0.5f)
+    // Left face (x = -1.f)
     {
-        glm::vec3 p0(-0.5f, 0.5f, 0.5f);
-        glm::vec3 p1(-0.5f, 0.5f, -0.5f);
-        glm::vec3 p2(-0.5f, -0.5f, -0.5f);
-        glm::vec3 p3(-0.5f, -0.5f, 0.5f);
+        glm::vec3 p0(-1.f, 1.f, 1.f);
+        glm::vec3 p1(-1.f, 1.f, -1.f);
+        glm::vec3 p2(-1.f, -1.f, -1.f);
+        glm::vec3 p3(-1.f, -1.f, 1.f);
         window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor({ 1,0.5,1 });
     }
 
 
-    //// Right face (x = 0.5f)
+    //// Right face (x = 1.f)
     {
-        glm::vec3 p0(0.5f, 0.5f, -0.5f);
-        glm::vec3 p1(0.5f, 0.5f, 0.5f);
-        glm::vec3 p2(0.5f, -0.5f, 0.5f);
-        glm::vec3 p3(0.5f, -0.5f, -0.5f);
+        glm::vec3 p0(1.f, 1.f, -1.f);
+        glm::vec3 p1(1.f, 1.f, 1.f);
+        glm::vec3 p2(1.f, -1.f, 1.f);
+        glm::vec3 p3(1.f, -1.f, -1.f);
         window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor({ 0.5,0.5,1 });
     }
 }
@@ -153,11 +160,18 @@ int main()
     shader->SetAtribsLocation({ {2,"lightColor"s} });
     shader->SetAtribsLocation({ {3,"ambientStrength"s} });
     GVertexBuffer l;
-    glm::vec3 lightColor = { 1,0,0 };
+    glm::vec3 lightColor = { 1,1,0 };
   
     window.SetShader(shader);
     
-    DrawCube(window);
+    //DrawCube(window);
+    {
+        glm::vec3 p0(1.f, 1.f, 1.f);
+        glm::vec3 p1(-1.f, 1.f, 1.f);
+        glm::vec3 p2(-1.f, -1.f, 1.f);
+        glm::vec3 p3(1.f, -1.f, 1.f);
+        window.AddGraphicElement(G_MAKE(GQuad)(p0, p1, p2, p3))->SetSize(10)->SetColor(BLUE);
+    }
 
     //window.ZoomAll();
 
@@ -190,6 +204,8 @@ GLint m_Viewport[4];
 
 glm3Vectors points;
 glm3Vectors quad;
+glm3Vectors spaceCube;
+glm3Vectors spaceEdge;
 glm3Vectors quadEdges;
 glm3Vectors dragVector2;
 
@@ -203,12 +219,65 @@ glm3Vectors tickPoint2;
 glm3Vectors startTickPoint2;
 
 glm::vec3 curentMousePos;
+
+double& GetSizeSpace()
+{
+    static double spaceSize;
+    return spaceSize;
+}
+bool OnUpdateSpaceSize();
+
+void SetSpaceSize(double val)
+{
+    GetSizeSpace() = val;
+    OnUpdateSpaceSize();
+}
+
+void UpdateSizeSpace()
+{
+
+}
+bool OnUpdateSpaceSize()
+{
+    int cx = m_Viewport[2] + m_Viewport[0];
+    int cy = m_Viewport[3] + m_Viewport[1];
+    if (cx < 15 || cy < 15)
+        return false;
+
+    // производим нормировку высоты и ширины
+    // для получения квадрата квадратным
+    GLdouble rw, rh, rz;
+    rz = rw = rh = GetSizeSpace();
+
+    // устанавливаем GL_PROJECTION
+    GLdouble fAspect = (GLdouble)cx / (GLdouble)cy;
+    if (cx > cy)
+        rw *= fAspect;
+    else
+        rh /= fAspect;
+
+    // устанавливаем двухмерную ортогональную матрицу
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-rw, rw, -rh, rh, -rz, rz);
+    glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
+    glMatrixMode(GL_MODELVIEW);
+
+}
 glm::vec3 Unproject(const glm::vec3& pos)
 {
     double x, y, z;
     gluUnProject(pos.x, pos.y, pos.z,m_ModelMatrix,m_ProjMatrix,m_Viewport,&x,&y,&z);
     return { x,y,z };
 }
+
+glm::vec3 Project(const glm::vec3& pos)
+{
+    double x, y, z;
+    gluProject(pos.x, pos.y, pos.z, m_ModelMatrix, m_ProjMatrix, m_Viewport, &x, &y, &z);
+    return { x,y,z };
+}
+
 
 void OnRotate(const glm::vec3& vec);
 
@@ -257,18 +326,19 @@ namespace CallBack
         std::cout << "cursor_moved:" << x << "\t" << y << std::endl;
         if (isMouseBnt1Presed && !isMouseBnt3Presed)
         {
+            //points.push_back(Unproject(newPos));
             auto curPos = Unproject(curentMousePos);
             auto translate = Unproject(newPos) - curPos;
-            glTranslatef(translate.x, translate.y, 0.f);
+
+            glTranslatef(translate.x, translate.y, translate.z);
             glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
-            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         if (isMouseBnt3Presed && !isMouseBnt1Presed)
         {
             OnRotate(newPos);
-            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
-            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
+            
+    
         }
 
         curentMousePos = newPos;
@@ -284,39 +354,41 @@ namespace CallBack
             toStartpoint2.clear();
             toEndpoint2.clear();
             glLoadIdentity();
+            glMatrixMode(GL_PROJECTION);
+            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
+
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
         }
         if (key == GLFW_KEY_UP && action == GLFW_PRESS)
         {
             glRotatef(5, 1, 0, 0);
             glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
-            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
         {
             glRotatef(-5, 1, 0, 0);
             glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
-            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
 
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
         {
             glRotatef(-5, 0, 1, 0);
             glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
-            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
+            
         }
-
         if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
         {
             glRotatef(5, 0, 1, 0);
-            glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
-            glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
         }
     }
+    
 
     void scroled(GLFWwindow* win, double xoffset, double yoffset)
-    {
-        glMatrixMode(GL_PROJECTION_MATRIX);     
+    {  
+        glMatrixMode(GL_PROJECTION);
         if (yoffset == 1)
         {
             glScalef(1.05f, 1.05, 1.f);
@@ -325,23 +397,17 @@ namespace CallBack
         {
             glScalef(0.95f, 0.95, 1.f);
         }
-        glMatrixMode(GL_MODELVIEW_MATRIX);
+
+        glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
+        glMatrixMode(GL_MODELVIEW);
     }
 }
 
 void OnRotate(const glm::vec3& vec)
 {
-    dragVector2.clear();
-    normalVector.clear();
-
     auto p0 = Unproject(curentMousePos);
     auto p1 = Unproject(vec);
-
-
     glm::vec3 v = p1 - p0;
-    dragVector2.push_back(p0);
-    dragVector2.push_back(p1);
-
     GBoundingBox m_DimModel;
     auto data = (float*)quad.data();
     GBoundingBox::GetPointListBoundingBox(3, 0, quad.size(), 3, data, m_DimModel, 0,nullptr);
@@ -369,6 +435,7 @@ void OnRotate(const glm::vec3& vec)
 
    
 }
+
 void Initialize(GLFWwindow*& window)
 {
     if (!glfwInit())
@@ -397,24 +464,23 @@ void Initialize(GLFWwindow*& window)
     glfwSetMouseButtonCallback(window, CallBack::mouse_callback);
     glfwSetScrollCallback(window, CallBack::scroled);
     glViewport((GLint)m_Viewport[0], (GLint)m_Viewport[1], (GLint)m_Viewport[2], (GLint)m_Viewport[3]);
-    glMatrixMode(GL_PROJECTION_MATRIX);
-    glOrtho(-1, 1, -1, 1, -1, 1);
-    glMatrixMode(GL_MODELVIEW_MATRIX);
-    glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
-    glGetIntegerv(GL_VIEWPORT, m_Viewport);
 
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1, 1, -1, 1, -2, 2);
+    glGetDoublev(GL_PROJECTION_MATRIX, m_ProjMatrix);
+
+    glMatrixMode(GL_MODELVIEW);
+    glGetDoublev(GL_MODELVIEW_MATRIX, m_ModelMatrix);
+    
+    glGetIntegerv(GL_VIEWPORT, m_Viewport);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LEQUAL);
 }
 
-int main()
+void AddCube()
 {
-    GLFWwindow* window = nullptr;
-    Initialize(window);
-
-  
-
     //// Top face(y = 0.5f)
     {
         glm::vec3 p0(0.5f, 0.5f, -0.5f);
@@ -483,7 +549,7 @@ int main()
         quadEdges.push_back(p2);
         quadEdges.push_back(p3);
     }
-    
+
 
     // Left face (x = -0.5f)
     {
@@ -519,20 +585,138 @@ int main()
         quadEdges.push_back(p2);
         quadEdges.push_back(p3);
     }
+}
+
+void DrawSpaceCube()
+{
+    spaceCube.clear();
+    spaceEdge.clear();
+    //// Top face(y = 1.f)
+    {
+        glm::vec3 p0(1.f, 1.f, -1.f);
+        glm::vec3 p1(-1.f, 1.f, -1.f);
+        glm::vec3 p2(-1.f, 1.f, 1.f);
+        glm::vec3 p3(1.f, 1.f, 1.f);
+
+        spaceCube.push_back(p0);
+        spaceCube.push_back(p1);
+        spaceCube.push_back(p2);
+        spaceCube.push_back(p3);
+
+        spaceEdge.push_back(p0);
+        spaceEdge.push_back(p1);
+        spaceEdge.push_back(p2);
+        spaceEdge.push_back(p3);
+
+    }
+
+    // Bottom face (y = -1.f)
+    {
+        glm::vec3 p0(1.f, -1.f, 1.f);
+        glm::vec3 p1(-1.f, -1.f, 1.f);
+        glm::vec3 p2(-1.f, -1.f, -1.f);
+        glm::vec3 p3(1.f, -1.f, -1.f);
+        spaceCube.push_back(p0);
+        spaceCube.push_back(p1);
+        spaceCube.push_back(p2);
+        spaceCube.push_back(p3);
+
+        spaceEdge.push_back(p0);
+        spaceEdge.push_back(p1);
+        spaceEdge.push_back(p2);
+        spaceEdge.push_back(p3);
+    }
+    //Front face  (z = 1.f)
+    {
+        glm::vec3 p0(1.f, 1.f, 1.f);
+        glm::vec3 p1(-1.f, 1.f, 1.f);
+        glm::vec3 p2(-1.f, -1.f, 1.f);
+        glm::vec3 p3(1.f, -1.f, 1.f);
+        spaceCube.push_back(p0);
+        spaceCube.push_back(p1);
+        spaceCube.push_back(p2);
+        spaceCube.push_back(p3);
+
+        spaceEdge.push_back(p0);
+        spaceEdge.push_back(p1);
+        spaceEdge.push_back(p2);
+        spaceEdge.push_back(p3);
+    }
+
+
+    // Back face (z = -1.f)
+    {
+        glm::vec3 p0(1.f, -1.f, -1.f);
+        glm::vec3 p1(-1.f, -1.f, -1.f);
+        glm::vec3 p2(-1.f, 1.f, -1.f);
+        glm::vec3 p3(1.f, 1.f, -1.f);
+        spaceCube.push_back(p0);
+        spaceCube.push_back(p1);
+        spaceCube.push_back(p2);
+        spaceCube.push_back(p3);
+
+        spaceEdge.push_back(p0);
+        spaceEdge.push_back(p1);
+        spaceEdge.push_back(p2);
+        spaceEdge.push_back(p3);
+    }
+
+
+    // Left face (x = -1.f)
+    {
+        glm::vec3 p0(-1.f, 1.f, 1.f);
+        glm::vec3 p1(-1.f, 1.f, -1.f);
+        glm::vec3 p2(-1.f, -1.f, -1.f);
+        glm::vec3 p3(-1.f, -1.f, 1.f);
+        spaceCube.push_back(p0);
+        spaceCube.push_back(p1);
+        spaceCube.push_back(p2);
+        spaceCube.push_back(p3);
+
+        spaceEdge.push_back(p0);
+        spaceEdge.push_back(p1);
+        spaceEdge.push_back(p2);
+        spaceEdge.push_back(p3);
+
+    }
+
+
+    //// Right face (x = 1.f)
+    {
+        glm::vec3 p0(1.f, 1.f, -1.f);
+        glm::vec3 p1(1.f, 1.f, 1.f);
+        glm::vec3 p2(1.f, -1.f, 1.f);
+        glm::vec3 p3(1.f, -1.f, -1.f);
+        spaceCube.push_back(p0);
+        spaceCube.push_back(p1);
+        spaceCube.push_back(p2);
+        spaceCube.push_back(p3);
+
+    }
+}
+int main()
+{
+    GLFWwindow* window = nullptr;
+    Initialize(window);
+
+    AddCube();
+    GBoundingBox m_DimModel;
+    auto data = (float*)quad.data();
+    GBoundingBox::GetPointListBoundingBox(3, 0, quad.size(), 3, data, m_DimModel, 0, nullptr);
+    SetSpaceSize(m_DimModel.MaximumDistanceTo({ 0,0,0 }));
+    OnUpdateSpaceSize();
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1, 1, 1, 1);
-        glPointSize(10);
-        
-    
-
-        glBegin(GL_POINTS);
-        glColor3f(0, 0, 1);
+        glPointSize(10);     
+       
+        glBegin(GL_QUADS);
+        glColor3f(0.1, 0.5, 1);
         for (auto& p : quad)
             glVertex3f(p.x, p.y, p.z);
         glEnd();
-
+       
         glBegin(GL_POINTS);
         glColor3f(0, 0, 1);
         for (auto& p : points)
@@ -540,30 +724,13 @@ int main()
         glEnd();
         
         glColor3f(0, 0, 0);
+        glLineWidth(5);
         glBegin(GL_LINE_LOOP);
-        for (size_t i = 0; i < quadEdges.size(); i += 2)
-        {
-            glVertex3f(quadEdges[i].x, quadEdges[i].y, quadEdges[i].z);
-            glVertex3f(quadEdges[i+1].x, quadEdges[i+1].y, quadEdges[i+1].z);
-           
-        }
-        glEnd();
-        
-        glPointSize(3);
-        glColor3f(1, 0, 0);
-        glBegin(GL_POINTS);
-        for (auto& p : dragVector2)
+        for (auto& p : quadEdges)
             glVertex3f(p.x, p.y, p.z);
         glEnd();
-
-
-        glColor3f(0, 0, 1);
-        glBegin(GL_POINTS);
-        for (auto& p : normalVector)
-            glVertex3f(p.x, p.y, p.z);
-        glEnd();
-        glLineWidth(1);
-
+      
+      
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
